@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>James Goulart — Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header id="site-nav" class="site-nav" aria-label="Primary"></header>
+    <main id="main" class="page"></main>
+    <script src="./data.js"></script>
+    <script src="./portfolio.js"></script>
+    <script src="./chat.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        Portfolio.injectNav(document.getElementById("site-nav"), "home");
+        Portfolio.renderHome(document.getElementById("main"));
+        var chatRoot = document.getElementById("chat-root");
+        if (chatRoot && window.JamesCVBot) {
+          JamesCVBot.init(chatRoot);
+        }
+      });
+    </script>
+  </body>
+</html>

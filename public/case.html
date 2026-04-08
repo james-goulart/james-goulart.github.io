@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Case — James Goulart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header id="site-nav" class="site-nav" aria-label="Primary"></header>
+    <main id="main" class="page"></main>
+    <script src="./data.js"></script>
+    <script src="./cases-content.js"></script>
+    <script src="./portfolio.js"></script>
+    <script>
+      function go() {
+        var id = decodeURIComponent((location.hash || "#").slice(1));
+        Portfolio.injectNav(
+          document.getElementById("site-nav"),
+          id ? "case-" + id : "cases"
+        );
+        Portfolio.renderCase(document.getElementById("main"));
+        var t = document.querySelector("title");
+        if (id && Portfolio.DATA) {
+          for (var i = 0; i < Portfolio.DATA.experiences.length; i++) {
+            var exp = Portfolio.DATA.experiences[i];
+            for (var j = 0; j < exp.cases.length; j++) {
+              if (exp.cases[j].id === id) {
+                if (t) t.textContent = exp.cases[j].name + " — Case";
+                break;
+              }
+            }
+          }
+        }
+      }
+      document.addEventListener("DOMContentLoaded", go);
+      window.addEventListener("hashchange", go);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,125 @@
+---
+
+From Bank Logic to User Logic: Redesigning an SME Loan Application Flow
+
+At Nexoos, a Brazilian peer-to-peer lending marketplace connecting SME borrowers with retail investors, I worked on a core friction point in the borrower journey: the loan request process. At the time, the experience followed a traditional bank model, requiring businesses to submit a large set of supporting documents before they could even receive a serious credit evaluation. This created a heavy upfront burden for applicants and kept conversion below 10%.
+
+I proposed inverting that logic. Instead of asking for proof first, we asked borrowers for structured business information that was easy to provide, enriched it with third-party data using company and owner tax IDs, and—with user permission—checked formal credit records. We then moved documentary proof of revenue, cash flow, and other compliance requirements to a later stage: only after a loan was conditionally approved and the borrower chose to proceed.
+
+This change allowed us to separate early-stage risk assessment from final verification. In practice, that meant reducing friction without removing control. Some applicants were still rejected later based on their information or failure to provide valid documents, but the overall performance of the journey improved dramatically. Loan request conversion rose from under 10% to roughly 80%, and positive progression into credit analysis exceeded 50%.
+
+What made this case meaningful to me was that the breakthrough did not come from polishing an interface. It came from challenging an inherited assumption in financial services: that compliance-heavy proof had to happen at the very start of the journey. By redesigning the sequence around user commitment rather than institutional habit, we created a faster, more credible, and more differentiated experience for SME borrowers.
+
+---
+
+Fixing the Last Mile of Investing: Designing an Investor Wallet for Nexoos
+
+At Nexoos, I worked on a critical friction point in the investor journey of our peer-to-peer lending marketplace. Each week, new approved loan opportunities were opened to investors, who could select where to allocate their money. But completing an investment still depended on a manual bank transfer made afterward to our financial partner. In practice, that meant many users expressed intent to invest but failed to complete the transfer on time—or at all—creating a poor experience for investors and a large operational burden for the business.
+
+I helped drive a shift to a wallet-based model through a fintech partner. Instead of funding each investment manually after selection, investors could keep money in a wallet account ahead of time. When they clicked to invest, the amount was debited automatically from their balance. Repayments from companies were also returned to the same wallet, where funds could continue to earn interest and be reinvested easily in future opportunities.
+
+This redesign significantly simplified the end-to-end system. It reduced failed or delayed investment completions, lowered the need for waiting lists and manual follow-up, and made investing feel much more seamless for users. More importantly, it created a stronger long-term loop: investors could accumulate repayments in their account and reinvest them with much less effort, helping them build their portfolio more naturally over time.
+
+What made this case especially meaningful was that the solution addressed both sides of the problem at once. Operationally, it removed a fragile process full of exceptions and manual handling. From the user’s perspective, it turned investing from a broken multi-step commitment into a more immediate and reliable action. It reminded me that some of the most valuable UX improvements come not from simplifying screens, but from redesigning how money, timing, and commitment actually work underneath the experience.
+
+---
+
+Funding Channel Sorting Hat: Designing a Fair Allocation System at Nexoos
+
+As Nexoos evolved from a pure peer-to-peer lending marketplace into a more complex lender with both retail and institutional capital, we faced a new challenge: how to allocate approved loans fairly across funding channels. Some loans were offered publicly through the marketplace to retail investors, while others were allocated privately into institutional portfolios backed by debentures. To maintain trust, avoid bias, and prepare for a more mature financial model, we needed a process that was not only effective, but also transparent and auditable.
+
+We created a rule-based allocation service internally called Sorting Hat. Each time a loan was approved, the service evaluated a set of characteristics—such as loan size, industry, assessed credit risk, prior performance, and concentration factors in the existing portfolios—and assigned the loan programmatically to either the marketplace or institutional channel. Rather than relying on ad hoc judgment, the system treated allocation as a portfolio-balancing problem and kept both channels aligned over time across multiple dimensions.
+
+This approach helped Nexoos scale a dual-channel funding model without undermining fairness. It reduced the risk of bias, improved the consistency of allocation decisions, and created a clear log of how selections were made. Just as importantly, it gave the company a more credible way to explain and defend the process internally and externally. For me, the case was a strong reminder that some of the most important product work happens below the surface: not in what users click, but in the invisible rules that determine whether a system is trusted at all.
+
+---
+
+From Saturation to Recovery: Designing Smart Pricing for Stranded Listings at QuintoAndar
+
+At QuintoAndar, I worked on marketplace liquidity, with a particular focus on stranded listings: properties that stayed live too long without being rented. We knew listing performance saturated quickly—if a property did not rent within roughly the first 6–8 weeks, its chances of renting later dropped sharply. Since price was the most scalable lever available, we explored how to use automated pricing intervention to recover those listings before they became effectively dead inventory.
+
+Our first versions did not work well. Smart pricing was initially offered as an optional feature during listing registration, allowing owners to authorize automatic price adjustments if the property underperformed. But because owners had not yet experienced any pain, most did not see value in enrolling. And when price changes happened too early, even enrolled owners often resisted them, believing their property simply needed more time.
+
+The successful version came from changing both the timing and the communication model. Rather than intervening early, we only activated smart pricing once the listing had clearly underperformed for several weeks. Owners were default-enrolled but could opt out, and we communicated upcoming price changes well in advance through a sequence of reminders. This gave people time to understand the rationale and reduced the feeling of being surprised by the system.
+
+Once prices began adjusting at the right moment, those listings became more competitive and were re-ranked more favorably in the marketplace, effectively giving them a second life. The result was a more sustainable conversion curve for aging inventory and a scalable mechanism for restoring liquidity to listings that would otherwise have stagnated.
+
+What made this case especially meaningful to me was that the core challenge was not choosing the right lever—we already knew price mattered. The challenge was understanding when users would be ready to accept that lever and how to make the intervention feel credible rather than punitive. It was a strong reminder that in marketplace products, timing and trust are often just as important as the algorithm itself.
+
+---
+
+When Not to Scale: What We Learned from Incubating iRent at QuintoAndar
+
+At QuintoAndar, I worked on incubating iRent, a new product inspired by the iBuyer model but adapted for rentals. The goal was to capture high-potential listings that were reaching our marketplace too late and often transacting elsewhere before we could close them. Instead of simply intermediating the rental, QuintoAndar would enter a mandate-style agreement with the owner, guarantee a rental amount, and then re-rent the property through the platform at a slightly higher price to cover vacancy and operating costs.
+
+Strategically, the idea was attractive: rather than losing hot listings to external market dynamics, we could lock more of those transactions into our own marketplace. But as we began operating the model, we uncovered a structural challenge. Because owners were more likely to reject offers that undervalued their property and accept offers that overvalued it, the portfolio became exposed to adverse selection. In other words, our pricing mistakes did not cancel each other out evenly—the most expensive mistakes were the ones most likely to enter the system.
+
+Over several months, we improved the internal pricing logic and tested the model in practice. What we found was that iRent could work in small geographic areas where we already had dense market data and strong confidence in pricing accuracy. Outside those areas, however, the error rate and downside risk increased too much for the model to be attractive at scale. Because the business only worked under narrow conditions, we decided to shelve it rather than force expansion beyond its real economic edge.
+
+What makes this case meaningful to me is that the outcome was not a scaled launch, but a better decision. We validated the concept, identified its structural limit, and chose not to build a broader product until the underlying data conditions were strong enough. It was a useful reminder that some of the best product work is not about proving that an idea can work somewhere, but about understanding whether it deserves to exist everywhere.
+
+---
+
+When a Valid Product Meets the Wrong Channel: Testing a Brokerage-Only Rental Model at QuintoAndar
+
+At QuintoAndar, while working on rental liquidity, I explored a brokerage-only rental product for owners who wanted help finding a tenant but did not want ongoing property administration. The thesis came from a real market signal: through inside sales and market observation, we knew there was a segment of owners who resisted our standard model because they preferred to manage the property themselves. In the broader market, this kind of offer already existed, so the question was whether QuintoAndar could capture that demand without weakening its core business.
+
+The challenge was that removing administration also removed a major portion of rental unit economics. So for the product to make sense, it had to bring in owners who were truly incremental—not simply shift existing customers from a more valuable offer to a cheaper one. To investigate that, I combined field research in Brasília with sales and platform testing to better understand who this product appealed to and under what market conditions.
+
+What we found was that the product’s biggest limitation was not the proposition itself, but the conditions required to make it work. In our existing acquisition channels, the offer was not effectively reaching the target segment and instead risked cannibalizing owners who would otherwise accept full administration. In Brasília specifically, the local rental market was so favorable to owners that many did not need even a brokerage-only service, since they could find tenants through free channels. At the same time, removing administration fees exposed a structural profitability gap that would likely require additional financial products to compensate.
+
+We chose not to scale the product at that time. But the work was still valuable: it clarified that the real challenge was segment access and monetization, not just product packaging. It also led to a broader thesis around financial add-ons and rental unit economics, which became the basis for later work. For me, this case was a strong reminder that a product can be conceptually sound and still be the wrong thing to launch if the channels, market conditions, and economics are not aligned well enough to support it.
+
+---
+
+Growing Profitability from the Installed Base: QuintoAndar’s Financial Add-Ons Thesis
+
+After exploring new rental propositions and realizing that segment expansion would be difficult through our existing channels, I shifted focus to a different question: how could QuintoAndar improve rental unit economics within the customer base it already had? At the time, the company already managed a large base of ongoing rentals, which created an opportunity to build optional financial products for owners and tenants on top of existing payment relationships.
+
+The thesis was to create small, useful add-ons that would not need broad adoption to matter. Instead of forcing a bundle, we looked for products with strong value for specific users and viable economics at scale. Over roughly a year, we tested five or six ideas. Some failed, such as home-equity lead generation, which showed little demand. But three products stood out.
+
+The first was rent anticipation for owners, which began as a simple way to receive monthly rent earlier for a fee and later evolved into a structured product allowing owners to anticipate multiple future rents, repaid through deductions from future rental flows. The second was brokerage financing, which allowed owners to spread the brokerage cost over future months instead of absorbing it upfront when a new rental started. This became the strongest product in adoption terms, reaching roughly 25% of new rentals. The third was credit-card rent payment for tenants, which offered more flexibility in monthly cash flow and became especially relevant during the pandemic, while also creating value through convenience and card rewards.
+
+What made these products work was not aggressive monetization, but fit. QuintoAndar already sat in the middle of recurring rental payments, which made it possible to build financial products around timing, deduction, and settlement with relatively strong operational control. Penetration was not huge for every product—some were closer to 5%—but satisfaction was high among the users who adopted them, which was exactly the model we were aiming for.
+
+For me, this case was important because it changed the way I thought about growth and monetization. Instead of treating profitability as something to solve only through pricing or expansion, we found a more modular path: use the company’s existing structural advantages to build optional financial products that made the rental relationship more useful for both sides of the marketplace.
+
+---
+
+From Marketplace Clone to Sales Engine: Transforming QuintoAndar’s For-Sale Business
+
+When I took over product leadership for QuintoAndar’s for-sale marketplace—first as Group Product Manager and later as Head of Product—it became clear that the business had been launched too much as a copy of rentals. That had helped us move fast: listings, visit flows, and early funnel mechanics were all intentionally similar. But as we went deeper into the category, we learned that sale was structurally different. The transaction was longer, more consultative, and much more constrained by buyer progression than by listing supply. In that context, optimizing agents for visit throughput—as we often did in rentals—was the wrong model.
+
+One of the first changes we made was to increase continuity between buyers and agents. Instead of treating visits as isolated scheduling events, we started designing for relationship ownership. That alone improved deeper-funnel behavior, especially second, third, and fourth visits, because buyers were being guided by someone who understood their context over time.
+
+The transformation accelerated when QuintoAndar acquired Casa Mineira, one of Brazil’s leading brokerages. Casa Mineira had a strong sales model and deep operating knowledge, while QuintoAndar had scalable technology, automated booking and allocation systems, and behavioral data from the marketplace. My team and I used the integration to redesign the full operating model for sales: we changed agent specialization, lead allocation, and commission logic; built systems to support more consistent agent ownership; and evolved the pre-agent qualification layer so that high-intent buyers could be identified proactively based on platform behavior, not just explicit hand-raising on a single listing.
+
+That combination created something better than either model alone. We kept the scalability of a tech-enabled marketplace while incorporating the consultative strengths of a high-performing brokerage. The result was the largest impact of my career: by December, we were signing roughly nine times more sale contracts than in January of the same year.
+
+What makes this case especially important to me is that it was not only a product success. It required coordinating across newly acquired teams, redesigning incentives and workflows, navigating culture change, and aligning many stakeholders around a new mental model for how sales should work. It was the clearest moment in my career where product leadership meant not just improving a funnel, but reshaping the operating system of the business itself.
+
+---
+
+Search, Qualification, and Quality: Redesigning Discovery at QuintoAndar
+
+As Senior Head of Product, I led a search thesis across QuintoAndar’s rental and for-sale marketplaces built around a central tension: asking users for more information improves relevance, but also increases friction. If a person searches too broadly—say, across an entire city with no filters—the chance of showing truly relevant inventory is low. But if search becomes a long questionnaire before results appear, the experience collapses under its own weight. Our challenge was to find the balance between lightweight exploration and enough qualification to make ranking meaningful.
+
+The first step was defining what a “qualified search” meant for our marketplace. We concluded that good search intent usually required a sufficiently specific location—such as a neighborhood, street, condo, or point of interest—combined with a basic set of filters: price range, number of rooms, and property type. Once we started measuring this, it became clear that too many searches were under-qualified. At the same time, user research showed that our interface was making the problem worse: the main search bar handled only location, while filters lived elsewhere, even though users naturally thought of both as part of the same search action.
+
+We redesigned the search experience into a single guided flow that combined location and the most important filters. We exposed only the basic filters by default and hid the long tail of advanced options unless users explicitly wanted more, reducing cognitive load while still supporting power users. In parallel, we improved search quality itself by strengthening exact matching for neighborhoods and streets, redesigning geographic retrieval with polygons and better regional definitions, and reworking the map experience—especially on mobile app—to align more closely with how users actually searched spatially.
+
+The result was a substantial improvement in marketplace performance: contracts increased by roughly 5% in rentals and 15% in sales. The impact was even larger in sales because inventory density was far higher there, making search precision much more important. What makes this case especially meaningful to me is that it brought together product design, behavioral insight, ranking logic, and technical search infrastructure under a single thesis. It was a reminder that great discovery systems are not built only by asking better questions or showing better results, but by making both sides of that exchange work together.
+
+---
+
+Conversational Search, Qualification, and Trust: Building QuintoAndar’s First LLM Product
+
+After leading a broader search thesis around qualification and quality, I pushed for search to become QuintoAndar’s first serious LLM product. At the time, the company was exploring how AI might reshape multiple parts of the experience, but the technology still felt early and reliability was a real concern. Search was the best place to start because it already had clear user pain, strong strategic visibility, and the potential to create both product value and organizational learning.
+
+The foundation for this came partly from an internal hackathon project that explored searching through listing photos using open-ended language. That idea connected naturally with a broader conversational model: instead of forcing users to rely only on a long list of structured filters, we introduced an AI search experience where people could describe what they wanted by text or voice, and the system would translate that into a search query while also retrieving relevant visual matches from listing photos.
+
+A key challenge was that we could not abandon what we had already learned about search. In previous work, we had established that qualified search mattered: broad, under-specified queries led to poor relevance. So the conversational agent had to do more than answer. It had to guide users toward a qualified search by prompting for basics such as location, price range, number of rooms, and property type when those signals were missing. In other words, the LLM did not replace qualification—it became a more natural interface for it.
+
+The second major challenge was trust. User research showed that people were skeptical of chatbots and would lose confidence quickly if the results felt generic or wrong. To address that, we changed not only the interface but also the ranking behavior. For visually grounded queries, we bypassed the standard ranking logic and used visual similarity to rank both the most relevant photo and the most relevant listing. We also made the best-matching photo become the listing cover for that query, which created immediate evidence that the system had understood the request. At the same time, we were careful not to overstate confidence in the UI: when visual matches were uncertain, we ranked accordingly but only used strong explanatory labels when model confidence was high.
+
+The product was successful on three fronts. It delivered a modest but real conversion improvement, particularly in sales where users had more specific intent and more inventory to sift through. It helped QuintoAndar build its first true LLM product muscle and early internal AI platform. And it gave the company a highly marketable innovation story through a product that felt tangible and differentiated rather than abstract. For me, this case was important because it showed how to introduce AI into a serious marketplace product without treating it as either a gimmick or a magic trick. The real work was not adding a chatbot. It was redesigning discovery so that language, retrieval, ranking, and trust worked together.
