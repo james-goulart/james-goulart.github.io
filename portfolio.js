@@ -959,32 +959,6 @@
       return;
     }
 
-    let spotlightId = null;
-    if (exp.cases.length > 0) {
-      spotlightId = exp.cases[0].id;
-    } else if (RELATED_CASE_FALLBACK[exp.id]) {
-      spotlightId = RELATED_CASE_FALLBACK[exp.id];
-    }
-    const spotlight = spotlightId ? findCaseById(spotlightId) : null;
-
-    let spotlightBlock = "";
-    if (spotlight) {
-      spotlightBlock =
-        '<aside class="spotlight">' +
-        "<h2>Spotlight case</h2>" +
-        '<p class="spotlight__name"><a href="case.html#' +
-        encodeURIComponent(spotlight.caseItem.id) +
-        '">' +
-        escapeHtml(spotlight.caseItem.name) +
-        "</a></p>" +
-        (spotlight.experience.id !== exp.id
-          ? '<p class="spotlight__note">Closely tied to this chapter (detailed under ' +
-            escapeHtml(spotlight.experience.role) +
-            ").</p>"
-          : "") +
-        "</aside>";
-    }
-
     const wm = companyWordmarkSrc(exp.company);
     const ic = companyIconSrc(exp.company);
     const expBrandRow =
@@ -1021,16 +995,17 @@
           narr && narr.trim()
             ? '<div class="narrative">' + formatNarrative(narr) + "</div>"
             : '<p class="muted">Full narrative in the dedicated case page.</p>';
-        const newsPreview =
+        const relatedNewsCards =
           c.relatedNews && c.relatedNews.length
-            ? '<p class="case-inline-news">' +
-              c.relatedNews.length +
-              " related link" +
-              (c.relatedNews.length === 1 ? "" : "s") +
-              ' — <a href="case.html#' +
-              encodeURIComponent(c.id) +
-              '">view on case page</a></p>'
+            ? c.relatedNews.map(function (u) {
+                return newsLinkCardHtml(u);
+              }).join("")
             : "";
+        const relatedNewsBlock = relatedNewsCards
+          ? '<section class="case-card__news"><h3>Related news</h3><div class="news-cards news-cards--grid news-cards--inverted">' +
+            relatedNewsCards +
+            "</div></section>"
+          : "";
         return (
           '<article class="case-block" id="' +
           escapeHtml(c.id) +
@@ -1039,7 +1014,7 @@
           escapeHtml(c.name) +
           "</h2>" +
           body +
-          newsPreview +
+          relatedNewsBlock +
           '<p class="case-more"><a class="btn btn--small" href="case.html#' +
           encodeURIComponent(c.id) +
           '">Open case page (news &amp; links)</a></p>' +
@@ -1070,7 +1045,6 @@
         : "") +
       (exp.track ? "<li><strong>Track</strong> " + escapeHtml(exp.track) + "</li>" : "") +
       "</ul></header>" +
-      spotlightBlock +
       orgBlock +
       academicBlock +
       (casesHtml
@@ -1079,9 +1053,7 @@
           "</section>"
         : legacyBlock
           ? legacyBlock
-          : !spotlight
-            ? '<p class="muted">No separate case rows for this role in the spreadsheet yet.</p>'
-            : "");
+          : '<p class="muted">No separate case rows for this role in the spreadsheet yet.</p>');
   }
 
   function formatNarrative(text) {

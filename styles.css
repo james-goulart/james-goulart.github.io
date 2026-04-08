@@ -1661,13 +1661,14 @@ a:hover {
 
 .case-block {
   margin-top: 2.5rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-light);
+  padding: 1.4rem 1.3rem;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--surface);
 }
 
 .case-block:first-of-type {
-  border-top: none;
-  padding-top: 0;
+  margin-top: 0;
 }
 
 .case-block h2 {
@@ -1692,6 +1693,40 @@ a:hover {
 
 .case-more {
   margin: 1rem 0 0;
+}
+
+.case-card__news {
+  margin-top: 1rem;
+}
+
+.case-card__news h3 {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.news-cards--inverted .news-card {
+  background: var(--text);
+  color: var(--bg);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.news-cards--inverted .news-card__host,
+.news-cards--inverted .news-card__action,
+.news-cards--inverted .news-card__related-label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.news-cards--inverted .news-card__title,
+.news-cards--inverted .news-card__related-title {
+  color: var(--bg);
+}
+
+.news-cards--inverted .news-card__related {
+  border-top-color: rgba(255, 255, 255, 0.16);
 }
 
 .cross-nav {
