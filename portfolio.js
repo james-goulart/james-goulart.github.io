@@ -202,11 +202,9 @@
       var trimmed = line.trim();
       var isDirect = /\(R\)/i.test(trimmed);
       var cls = isDirect ? "org-line org-line--direct" : "org-line";
-      var display = trimmed.replace(/\s*\(R\)\s*/gi, "");
       return (
         '<li class="' + cls + '">' +
-        escapeHtml(display) +
-        (isDirect ? '<span class="org-badge">direct</span>' : "") +
+        escapeHtml(trimmed) +
         "</li>"
       );
     });
@@ -1051,7 +1049,7 @@
       .join("");
 
     const orgBlock = exp.orgScope
-      ? '<section class="meta-block"><h2>Organization scope</h2>' +
+      ? '<section class="meta-block"><h2>Org Scope</h2>' +
         renderOrgScope(exp.orgScope) +
         "</section>"
       : "";
@@ -1313,7 +1311,7 @@
             : "";
           var scopeHtml =
             e.orgScope && String(e.orgScope).trim()
-              ? '<span class="card__scope">' + escapeHtml(e.orgScope) + "</span>"
+              ? '<span class="card__scope">Org Scope: ' + escapeHtml(e.orgScope) + "</span>"
               : "";
           return (
             '<a class="card card--exp' +

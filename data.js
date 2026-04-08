@@ -19,7 +19,7 @@ window.PORTFOLIO_DATA = {
                         {
                             "id":  "aiesec-teacher-st-pete",
                             "company":  "AIESEC",
-                            "role":  "Teacher - St. Petersburg",
+                            "role":  "Cultural Teacher",
                             "track":  "Volunteering",
                             "tenure":  "",
                             "location":  "St. Petersburg, Russia",
