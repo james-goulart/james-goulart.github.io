@@ -67,6 +67,9 @@ window.PORTFOLIO_DATA = {
                             "location":  "São Paulo, Brazil",
                             "locationFlag":  "BR",
                             "orgScope":  "2 Ops Analysts (R)\n4 Engineers",
+                            "highlights":  [
+                                               "Evolved MVP platform and model to start operations"
+                                           ],
                             "cases":  [
                                           {
                                               "id":  "nexoos-product-owner-inverted-loan-request-ux",
@@ -88,6 +91,11 @@ window.PORTFOLIO_DATA = {
                             "location":  "São Paulo, Brazil",
                             "locationFlag":  "BR",
                             "orgScope":  "1 PM (R)\n2 Data Analysts (R)\n1 Designer (R)\n12 Engineers",
+                            "highlights":  [
+                                               "Scaled team and product until 20M USD in loans financed",
+                                               "Traction for Series A",
+                                               "Preparation to become a Central Bank-approved financial institution"
+                                           ],
                             "cases":  [
                                           {
                                               "id":  "nexoos-head-of-product-data-investor-wallet",
@@ -118,11 +126,15 @@ window.PORTFOLIO_DATA = {
                             "location":  "São Paulo, Brazil",
                             "locationFlag":  "BR",
                             "orgScope":  "1 APM\n1 Designer\n9 Engineers",
+                            "highlights":  [
+                                               "+20% stranded listings conversion",
+                                               "2 new business products incubated"
+                                           ],
                             "cases":  [
                                           {
                                               "id":  "quintoandar-product-manager-rental-liquidity-smartpricing",
                                               "name":  "From Saturation to Recovery: Designing Smart Pricing for Stranded Listings at QuintoAndar",
-                                              "narrative":  "Designed smart pricing for stranded rental listings. Early versions failed (owners opted in before feeling pain). Successful version: default-enrolled, delayed intervention until clear underperformance (week 6\u20138), progressive communication runway before adjustments. Gave stale listings a second life through improved attractiveness and marketplace re-ranking.",
+                                              "narrative":  "Designed smart pricing for stranded rental listings. Early versions failed (owners opted in before feeling pain). Successful version: default-enrolled, delayed intervention until clear underperformance (week 6\u20138), progressive communication runway before adjustments. Gave stale listings a second life through improved attractiveness and marketplace re-ranking, increasing stranded listings conversion by +20%.",
                                               "results":  "",
                                               "relatedNews":  [
                                                                   "https://forbes.com.br/forbes-tech/2020/09/quintoandar-anuncia-precificacao-inteligente/"
@@ -157,6 +169,10 @@ window.PORTFOLIO_DATA = {
                             "location":  "São Paulo, Brazil",
                             "locationFlag":  "BR",
                             "orgScope":  "2 APMs (R)\n2 Designers\n4 Data Scientists\n16 Engineers",
+                            "highlights":  [
+                                               "+0.4M USD monthly profit via add-ons products",
+                                               "Improved rental unit economics profitability"
+                                           ],
                             "cases":  [
                                           {
                                               "id":  "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons",
@@ -179,6 +195,10 @@ window.PORTFOLIO_DATA = {
                             "location":  "São Paulo, Brazil",
                             "locationFlag":  "BR",
                             "orgScope":  "Design/Eng/Data Peers\n2 GPMs (R)\n5 PMs (R)\n3 APMs (R)\n4 Designers\n2 Data Analysts\n30 Engineers",
+                            "highlights":  [
+                                               "9x ForSale monthly contracts in 1 year",
+                                               "Successful acquisition integration"
+                                           ],
                             "cases":  [
                                           {
                                               "id":  "quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth",
@@ -200,6 +220,11 @@ window.PORTFOLIO_DATA = {
                             "location":  "Lisbon, Portugal",
                             "locationFlag":  "PT",
                             "orgScope":  "Design/Eng/Data Peers\n5 Staff PMs (R)\n7 Sr. Designers\n10 Data Scientists\n50 Engineers",
+                            "highlights":  [
+                                               "Co-launched Lisbon Tech Hub (0-80 HC)",
+                                               "10%+ signed contracts via search evolutions",
+                                               "1st LLM product"
+                                           ],
                             "cases":  [
                                           {
                                               "id":  "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",

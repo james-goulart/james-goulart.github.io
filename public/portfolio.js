@@ -12,6 +12,11 @@
       label: "LinkedIn",
       svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
     },
+    {
+      href: "https://github.com/james-goulart",
+      label: "GitHub",
+      svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.1.82-.26.82-.58 0-.28-.01-1.04-.02-2.04-3.34.72-4.04-1.6-4.04-1.6-.55-1.38-1.33-1.75-1.33-1.75-1.1-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.08 1.84 2.83 1.3 3.52.98.1-.78.42-1.3.76-1.6-2.66-.3-5.46-1.34-5.46-5.95 0-1.3.47-2.36 1.24-3.2-.12-.3-.54-1.52.12-3.17 0 0 1-.33 3.3 1.22a11.45 11.45 0 0 1 6 0c2.3-1.55 3.3-1.22 3.3-1.22.66 1.65.24 2.87.12 3.17.77.84 1.24 1.9 1.24 3.2 0 4.62-2.8 5.65-5.47 5.95.43.37.82 1.1.82 2.22 0 1.6-.01 2.9-.01 3.3 0 .32.22.68.82.57A12.01 12.01 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>',
+    },
   ];
 
   /** When an experience has no cases in the sheet, link to this case id (cross-role). */
@@ -48,6 +53,17 @@
       "quintoandar-product-manager-rental-liquidity-smartpricing",
       "quintoandar-product-manager-rental-liquidity-no-adm",
     ],
+  };
+
+  const ORG_ABOUT = {
+    QuintoAndar:
+      "QuintoAndar is Latam's leading proptech, combining marketplace technology, financing, and brokerage operations to simplify renting and buying homes at scale.",
+    Nexoos:
+      "Nexoos was a Brazilian lending fintech connecting SMEs to capital, evolving from a peer-to-peer marketplace into a multi-channel credit platform with institutional funding.",
+    AIESEC:
+      "AIESEC is a global, UN-backed youth organization focused on leadership development through cross-cultural exchange and volunteer experiences.",
+    Unicamp:
+      "Unicamp is one of Brazil's top public research universities, known for strong engineering, science, and innovation programs."
   };
 
   function escapeHtml(s) {
@@ -209,6 +225,57 @@
       );
     });
     return '<ul class="org-scope-list">' + items.join("") + "</ul>";
+  }
+
+  function renderHighlights(highlights) {
+    if (!Array.isArray(highlights) || highlights.length === 0) return "";
+    var items = highlights
+      .map(function (item) { return String(item || "").trim(); })
+      .filter(Boolean)
+      .map(function (item) {
+        return "<li>" + escapeHtml(item) + "</li>";
+      });
+    if (!items.length) return "";
+    return '<ul class="highlights-list">' + items.join("") + "</ul>";
+  }
+
+  function orgAboutText(exp) {
+    return ORG_ABOUT[exp.company] || "";
+  }
+
+  function splitExperienceRole(exp) {
+    if (exp && exp.id === "nexoos-product-owner") {
+      return { main: "Product, Data & Operations", sub: "3rd Employee" };
+    }
+    var role = String((exp && exp.role) || "").trim();
+    var idx = role.indexOf(" - ");
+    if (idx === -1) return { main: role, sub: "" };
+    return {
+      main: role.slice(0, idx).trim(),
+      sub: role.slice(idx + 3).trim()
+    };
+  }
+
+  function roleHtmlWithSubtitle(exp, wrapperClass) {
+    var parts = splitExperienceRole(exp);
+    var cls = wrapperClass ? ' class="' + wrapperClass + '"' : "";
+    var sub = "";
+    if (parts.sub) {
+      sub = '<br /><em class="role-subtitle">' + escapeHtml(parts.sub) + "</em>";
+    } else if (exp && exp.id === "nexoos-head-of-product-data") {
+      sub = '<br /><span class="role-subtitle role-subtitle--placeholder" aria-hidden="true">&nbsp;</span>';
+    }
+    return "<span" + cls + ">" + escapeHtml(parts.main) + sub + "</span>";
+  }
+
+  function renderCardBullets(lines) {
+    if (!Array.isArray(lines) || lines.length === 0) return "";
+    var items = lines
+      .map(function (item) { return String(item || "").trim(); })
+      .filter(Boolean)
+      .map(function (item) { return "<li>" + escapeHtml(item) + "</li>"; });
+    if (!items.length) return "";
+    return '<ul class="card-bullets">' + items.join("") + "</ul>";
   }
 
   /** 2nd-level experience links: flag + role (+ optional subtitle line). */
@@ -975,11 +1042,9 @@
         : "";
 
     const roleLine =
-      exp.id === "nexoos-product-owner"
-        ? '<p class="page-head__role"><span class="page-head__role-text">' +
-          escapeHtml(exp.role) +
-          '<br /><span class="page-head__employee-note">3rd employee</span></span></p>'
-        : '<p class="page-head__role">' + escapeHtml(exp.role) + "</p>";
+      '<p class="page-head__role">' +
+      roleHtmlWithSubtitle(exp, "page-head__role-text") +
+      "</p>";
 
     const legacyBlock =
       exp.legacySummary && String(exp.legacySummary).trim()
@@ -995,16 +1060,22 @@
           narr && narr.trim()
             ? '<div class="narrative">' + formatNarrative(narr) + "</div>"
             : '<p class="muted">Full narrative in the dedicated case page.</p>';
-        const relatedNewsCards =
+        const relatedNewsItems =
           c.relatedNews && c.relatedNews.length
             ? c.relatedNews.map(function (u) {
-                return newsLinkCardHtml(u);
+                return (
+                  '<li><a href="' +
+                  escapeHtml(String(u || "").trim()) +
+                  '" target="_blank" rel="noopener noreferrer">' +
+                  escapeHtml(relatedNewsTitleEn(u) || String(u || "").trim()) +
+                  "</a></li>"
+                );
               }).join("")
             : "";
-        const relatedNewsBlock = relatedNewsCards
-          ? '<section class="case-card__news"><h3>Related news</h3><div class="news-cards news-cards--grid news-cards--inverted">' +
-            relatedNewsCards +
-            "</div></section>"
+        const relatedNewsBlock = relatedNewsItems
+          ? '<section class="case-card__news"><h3>Related news</h3><ul class="case-card__news-list">' +
+            relatedNewsItems +
+            "</ul></section>"
           : "";
         return (
           '<article class="case-block" id="' +
@@ -1015,18 +1086,23 @@
           "</h2>" +
           body +
           relatedNewsBlock +
-          '<p class="case-more"><a class="btn btn--small" href="case.html#' +
-          encodeURIComponent(c.id) +
-          '">Open case page (news &amp; links)</a></p>' +
           "</article>"
         );
       })
       .join("");
 
-    const orgBlock = exp.orgScope
-      ? '<section class="meta-block"><h2>Org Scope</h2>' +
-        renderOrgScope(exp.orgScope) +
-        "</section>"
+    const scopePane = exp.orgScope
+      ? '<div class="overview-pane"><h3>Org Scope</h3>' + renderOrgScope(exp.orgScope) + "</div>"
+      : "";
+    const highlightsPane = exp.highlights && exp.highlights.length
+      ? '<div class="overview-pane"><h3>Highlights</h3>' + renderHighlights(exp.highlights) + "</div>"
+      : "";
+    const overviewBlock = scopePane || highlightsPane
+      ? '<section class="meta-block meta-block--overview"><div class="overview-grid">' + highlightsPane + scopePane + "</div></section>"
+      : "";
+    const aboutText = orgAboutText(exp);
+    const aboutBlock = aboutText
+      ? '<section class="meta-block meta-block--about"><h2>About ' + escapeHtml(exp.company) + '</h2><p>' + escapeHtml(aboutText) + "</p></section>"
       : "";
     const academicBlock =
       exp.id === "unicamp-bsc-electrical-engineering"
@@ -1045,7 +1121,8 @@
         : "") +
       (exp.track ? "<li><strong>Track</strong> " + escapeHtml(exp.track) + "</li>" : "") +
       "</ul></header>" +
-      orgBlock +
+      overviewBlock +
+      aboutBlock +
       academicBlock +
       (casesHtml
         ? '<section class="cases-section"><h2 class="sr-only">Cases</h2>' +
@@ -1176,9 +1253,12 @@
       rawUrls.length > 0
         ? '<aside class="case-aside" aria-label="Related news and links">' +
           "<h2>Related news &amp; links</h2>" +
-          '<div class="news-cards">' +
-          rawUrls.map(function(u) { return newsLinkCardHtml(u); }).join("") +
-          "</div></aside>"
+          '<ul class="case-related-news-list">' +
+          rawUrls.map(function(u) {
+            var raw = String(u || "").trim();
+            return '<li><a href="' + escapeHtml(raw) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(relatedNewsTitleEn(raw) || raw) + "</a></li>";
+          }).join("") +
+          "</ul></aside>"
         : "";
 
     const roleSubtitle = casePageRoleLineHtml(exp);
@@ -1211,7 +1291,7 @@
       "<h1>" +
       escapeHtml(c.name) +
       "</h1>" +
-      '<p class="page-head__role">' +
+      '<p class="page-head__role page-head__role--case">' +
       roleSubtitle +
       "</p></header>" +
       '<div class="case-layout">' +
@@ -1229,51 +1309,91 @@
   function renderCasesIndex(main) {
     setHomePageMode(main, false);
     const items = getAllCases();
-    const cards = items
+    var selected = "All";
+    try {
+      var q = new URLSearchParams(window.location.search);
+      selected = q.get("cat") || "All";
+    } catch (e) {}
+    if (selected !== "All" && !CASE_IDS_BY_GROUP[selected]) selected = "All";
+    const filtered = selected === "All"
+      ? items
+      : items.filter(function (x) {
+          return (CASE_IDS_BY_GROUP[selected] || []).indexOf(x.caseItem.id) !== -1;
+        });
+    const cards = filtered
       .map(function (x) {
+        var companyLogo = companyCardLogoSrc(x.experience);
+        var logoHtml = companyLogo
+          ? '<img class="card__logo card__logo--case" src="' +
+            escapeHtml(companyLogo) +
+            '" alt="" width="120" height="32" loading="lazy" />'
+          : '<span class="card__company">' + escapeHtml(x.experience.company) + "</span>";
+        var relatedNewsHtml =
+          x.caseItem.relatedNews && x.caseItem.relatedNews.length
+            ? '<section class="case-card__news"><h3>Related News</h3><ul class="case-card__news-list">' +
+              x.caseItem.relatedNews.map(function (u) {
+                var raw = String(u || "").trim();
+                return '<li><a href="' + escapeHtml(raw) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(relatedNewsTitleEn(raw) || raw) + "</a></li>";
+              }).join("") +
+              "</ul></section>"
+            : "";
         return (
-          '<a class="card card--case" href="case.html#' +
+          '<article class="card card--case">' +
+          logoHtml +
+          '<a class="card__company card__company--case-link" href="case.html#' +
           encodeURIComponent(x.caseItem.id) +
           '">' +
-          '<span class="card__company">' +
           escapeHtml(x.caseItem.name) +
-          "</span>" +
+          "</a>" +
           '<span class="card__role card__role--with-icon">' +
-          workCardIconHtml(x.experience.company) +
-          '<span class="card__role-inline">' +
-          escapeHtml(x.experience.company) +
-          " — " +
-          escapeHtml(x.experience.role) +
+          '<span class="card__role-inline card__role-inline--case">' +
+          roleHtmlWithSubtitle(x.experience, "card__role-text") +
           "</span></span>" +
-          (x.caseItem.relatedNews && x.caseItem.relatedNews.length
-            ? '<span class="card__meta">' +
-              x.caseItem.relatedNews.length +
-              " link" +
-              (x.caseItem.relatedNews.length === 1 ? "" : "s") +
-              "</span>"
-            : "") +
-          "</a>"
+          relatedNewsHtml +
+          "</article>"
         );
       })
       .join("");
+
+    const caseFilterOrder = ["All"].concat(CASE_NAV_ORDER.filter(function (x) { return x !== "All"; }));
+    const filterButtons = caseFilterOrder.map(function (cat) {
+      var label = cat === "All" ? "All" : cat;
+      return '<button type="button" class="case-filter-btn' + (cat === selected ? " is-active" : "") + '" data-cat="' + escapeHtml(cat) + '">' + escapeHtml(label) + "</button>";
+    }).join("");
 
     main.innerHTML =
       '<header class="page-head">' +
       "<h1>Cases</h1>" +
       "<p>Every case from the portfolio, with narratives and related news links.</p>" +
       "</header>" +
+      '<section class="cases-filters cases-filters--tight" aria-label="Filter by"><span class="cases-filters__label">Filter by:</span>' + filterButtons + "</section>" +
       '<section class="grid-actions" aria-label="Case list">' +
-      cards +
+      (cards || '<p class="muted">No cases in this filter yet.</p>') +
       "</section>";
+    requestAnimationFrame(function () {
+      enhanceNewsCardTitles(main);
+    });
+    main.querySelectorAll(".case-filter-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var cat = btn.getAttribute("data-cat") || "All";
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.set("cat", cat);
+          window.history.replaceState({}, "", url.toString());
+        } catch (e) {}
+        renderCasesIndex(main);
+      });
+    });
   }
 
   function renderExperiencesIndex(main) {
     setHomePageMode(main, false);
-    function buildCardsByFilter(filterFn) {
+    function buildCardsByFilter(filterFn, reverseOrder) {
+      var reverse = reverseOrder !== false;
       return DATA.experiences
         .filter(filterFn)
         .slice()
-        .reverse()
+        [reverse ? "reverse" : "slice"]()
         .map(function (e) {
           var cardLogo = companyCardLogoSrc(e);
           var logoHtml = cardLogo
@@ -1281,9 +1401,32 @@
               escapeHtml(cardLogo) +
               '" alt="" width="120" height="32" loading="lazy" />'
             : "";
-          var scopeHtml =
+          var scopeLines =
             e.orgScope && String(e.orgScope).trim()
-              ? '<span class="card__scope">Org Scope: ' + escapeHtml(e.orgScope) + "</span>"
+              ? String(e.orgScope).split("\n")
+              : [];
+          var highlightsLines =
+            e.highlights && e.highlights.length
+              ? e.highlights
+              : [];
+          var cardDetailsHtml =
+            scopeLines.length || highlightsLines.length
+              ? '<div class="card__details">' +
+                '<div class="card__detail-block"><strong>Highlights</strong>' +
+                renderCardBullets(highlightsLines) +
+                "</div>" +
+                '<div class="card__detail-block"><strong>Org Scope</strong>' +
+                renderCardBullets(scopeLines) +
+                "</div>" +
+                "</div>"
+              : "";
+          var casesHtml =
+            e.cases && e.cases.length
+              ? '<div class="card__cases"><strong>Cases</strong><ul class="card-bullets card-bullets--cases">' +
+                e.cases.map(function (c) {
+                  return '<li><span class="card-inline-link" role="link" tabindex="0" data-case-href="case.html#' + encodeURIComponent(c.id) + '">' + escapeHtml(c.name) + "</span></li>";
+                }).join("") +
+                "</ul></div>"
               : "";
           return (
             '<a class="card card--exp' +
@@ -1296,7 +1439,7 @@
               ? ""
               : '<span class="card__company">' + escapeHtml(e.company) + "</span>") +
             '<span class="card__role">' +
-            escapeHtml(e.role) +
+            roleHtmlWithSubtitle(e, "card__role-text") +
             "</span>" +
             '<span class="card__meta">' +
             tenureLabel(e.tenure) +
@@ -1308,43 +1451,85 @@
                 escapeHtml(e.location) +
                 "</span>"
               : "") +
-            scopeHtml +
+            cardDetailsHtml +
+            casesHtml +
             "</a>"
           );
         })
         .join("");
     }
+    var selected = "all";
+    try {
+      var q = new URLSearchParams(window.location.search);
+      selected = (q.get("exp") || "all").toLowerCase();
+    } catch (e) {}
+    if (["all", "professional", "volunteering", "academic"].indexOf(selected) === -1) {
+      selected = "all";
+    }
 
-    var professionalCards = buildCardsByFilter(function (e) {
-      return e.track !== "Volunteering" && e.track !== "Degree";
-    });
-    var volunteeringCards = buildCardsByFilter(function (e) {
-      return e.track === "Volunteering";
-    });
-    var academicCards = buildCardsByFilter(function (e) {
-      return e.track === "Degree";
-    });
+    var filterMap = {
+      all: function () { return true; },
+      professional: function (e) { return e.track !== "Volunteering" && e.track !== "Degree"; },
+      volunteering: function (e) { return e.track === "Volunteering"; },
+      academic: function (e) { return e.track === "Degree"; }
+    };
+    var cards = "";
+    if (selected === "all") {
+      var professionalCards = buildCardsByFilter(filterMap.professional, true);
+      var volunteeringCards = buildCardsByFilter(filterMap.volunteering, false);
+      var academicCards = buildCardsByFilter(filterMap.academic, false);
+      cards = professionalCards + volunteeringCards + academicCards;
+    } else {
+      var reverseOrder = selected !== "volunteering";
+      cards = buildCardsByFilter(filterMap[selected], reverseOrder);
+    }
+    var filterButtons = [
+      { id: "all", label: "All" },
+      { id: "professional", label: "Professional" },
+      { id: "volunteering", label: "Volunteering" },
+      { id: "academic", label: "Academic" }
+    ].map(function (f) {
+      return '<button type="button" class="case-filter-btn' + (f.id === selected ? " is-active" : "") + '" data-exp-filter="' + f.id + '">' + f.label + "</button>";
+    }).join("");
 
     main.innerHTML =
       '<header class="page-head">' +
       "<h1>Experiences</h1>" +
       "<p>Professional, volunteering, and academic chapters from James's background.</p>" +
       "</header>" +
-      '<section class="experience-band" aria-label="Professional experiences">' +
-      "<h2>Professional experiences</h2>" +
-      '<div class="grid-actions">' +
-      professionalCards +
-      "</div></section>" +
-      '<section class="experience-band" aria-label="Volunteering experiences">' +
-      "<h2>Volunteering experiences</h2>" +
-      '<div class="grid-actions">' +
-      volunteeringCards +
-      "</div></section>" +
-      '<section class="experience-band" aria-label="Academic experiences">' +
-      "<h2>Academic experiences</h2>" +
-      '<div class="grid-actions">' +
-      academicCards +
-      "</div></section>";
+      '<section class="cases-filters cases-filters--tight" aria-label="Filter by"><span class="cases-filters__label">Filter by:</span>' +
+      filterButtons +
+      "</section>" +
+      '<section class="grid-actions" aria-label="Experiences list">' +
+      (cards || '<p class="muted">No experiences in this filter yet.</p>') +
+      "</section>";
+    main.querySelectorAll(".card-inline-link[data-case-href]").forEach(function (el) {
+      var href = el.getAttribute("data-case-href");
+      if (!href) return;
+      el.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        window.location.href = href;
+      });
+      el.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          window.location.href = href;
+        }
+      });
+    });
+    main.querySelectorAll(".case-filter-btn[data-exp-filter]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var f = btn.getAttribute("data-exp-filter") || "all";
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.set("exp", f);
+          window.history.replaceState({}, "", url.toString());
+        } catch (e) {}
+        renderExperiencesIndex(main);
+      });
+    });
   }
 
   function renderNewsIndex(main) {
@@ -1384,7 +1569,7 @@
       "<h1>News &amp; Mentions</h1>" +
       "<p>Articles, videos, and media mentions related to cases in the portfolio.</p>" +
       "</header>" +
-      '<section class="news-cards news-cards--grid" aria-label="News list">' +
+      '<section class="news-cards news-cards--grid news-cards--tight" aria-label="News list">' +
       cards +
       "</section>";
 
