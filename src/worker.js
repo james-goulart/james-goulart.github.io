@@ -73,9 +73,24 @@ function buildApiMessages(messages) {
   ].filter((m) => m.role === "system" || String(m.content || "").trim().length > 0);
 }
 
+/** Read body once; avoids rare empty reads from .text() on some responses. */
+async function bodyTextFromResponse(res) {
+  try {
+    const ab = await res.arrayBuffer();
+    return new TextDecoder("utf-8").decode(ab);
+  } catch {
+    try {
+      return await res.text();
+    } catch {
+      return "";
+    }
+  }
+}
+
 function openAiHeaders(env) {
+  const key = String(env.OPENAI_API_KEY || "").trim();
   const headers = {
-    Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+    Authorization: `Bearer ${key}`,
     "Content-Type": "application/json",
   };
   if (env.OPENAI_ORG_ID && String(env.OPENAI_ORG_ID).trim()) {
@@ -148,7 +163,7 @@ async function fetchOpenAIChat(env, payload) {
     body: JSON.stringify(payload),
   });
   if (res.status === 400) {
-    firstErrorText = await res.text();
+    firstErrorText = await bodyTextFromResponse(res);
     const minimal = {
       model: payload.model,
       messages: payload.messages,
@@ -161,6 +176,45 @@ async function fetchOpenAIChat(env, payload) {
     });
   }
   return { res, firstErrorText };
+}
+
+/** Minimal non-stream call to isolate key/model vs. full chat payload. */
+async function probeOpenAIKey(env) {
+  const url = "https://api.openai.com/v1/chat/completions";
+  const h = openAiHeaders(env);
+  const model = (env.OPENAI_CHAT_MODEL || "gpt-4o-mini").trim();
+  const r = await fetch(url, {
+    method: "POST",
+    headers: h,
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: "ping" }],
+      max_tokens: 5,
+      stream: false,
+    }),
+  });
+  const text = await bodyTextFromResponse(r);
+  return {
+    probeStatus: r.status,
+    probeLen: text.length,
+    probePreview: text.slice(0, 600),
+    probeRequestId:
+      r.headers.get("openai-request-id") ||
+      r.headers.get("x-request-id") ||
+      null,
+  };
+}
+
+function responseMeta(res) {
+  return {
+    status: res.status,
+    contentType: res.headers.get("content-type") || "",
+    contentLength: res.headers.get("content-length") || "",
+    openaiRequestId:
+      res.headers.get("openai-request-id") ||
+      res.headers.get("x-request-id") ||
+      "",
+  };
 }
 
 async function streamOpenAIToClient(openAIResponse) {
@@ -348,7 +402,7 @@ export default {
     );
 
     if (!upstream.ok) {
-      const errText = await upstream.text();
+      const errText = await bodyTextFromResponse(upstream);
       const firstS = parseOpenAIErrorStructured(firstErrorText);
       const lastS = parseOpenAIErrorStructured(errText);
       const openai = mergeOpenAIMeta(firstS, lastS);
@@ -357,20 +411,45 @@ export default {
           ? String(firstErrorText).slice(0, 800)
           : "") ||
         (errText && String(errText).trim() ? String(errText).slice(0, 800) : "");
-      const detail =
+      let detail =
         firstS.message ||
         lastS.message ||
         rawFallback ||
         `OpenAI request failed (${upstream.status})`;
 
+      const lastMeta = responseMeta(upstream);
+      let probe = null;
+      if (
+        !(firstErrorText || "").trim() &&
+        !String(errText || "").trim() &&
+        (upstream.status === 400 || upstream.status === 401)
+      ) {
+        try {
+          probe = await probeOpenAIKey(env);
+          if (probe.probePreview && probe.probeStatus !== 200) {
+            detail =
+              parseOpenAIErrorBody(probe.probePreview) ||
+              probe.probePreview.slice(0, 400) ||
+              detail;
+          } else if (probe.probeStatus === 200) {
+            detail =
+              "OpenAI returned empty error bodies for the chat request, but a minimal ping with the same model succeeded. The problem is likely the system prompt size, total message length, or message shape — not the API key.";
+          }
+        } catch (pe) {
+          probe = { probeError: String(pe?.message || pe) };
+        }
+      }
+
       console.error("[chat] OpenAI error", {
         upstreamStatus: upstream.status,
+        lastMeta,
         model: openAiPayload.model,
         messageCount: apiMessages.length,
         firstError: (firstErrorText || "").slice(0, 1500),
         lastError: (errText || "").slice(0, 1500),
         openai,
         detail,
+        probe,
       });
 
       const body = {
@@ -381,6 +460,8 @@ export default {
           lastLen: (errText || "").length,
           firstPreview: (firstErrorText || "").slice(0, 400),
           lastPreview: (errText || "").slice(0, 400),
+          lastResponse: lastMeta,
+          probe,
         },
         openai:
           openai.code || openai.param || openai.type ? openai : undefined,
