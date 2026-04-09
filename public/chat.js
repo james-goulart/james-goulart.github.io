@@ -540,8 +540,13 @@
           (err && err.name === "TypeError")
         ) {
           if (bodyEl) {
-            bodyEl.innerHTML =
-              '<p class="chat-error">Could not reach the server. Run <code>npm start</code> in the project folder, then open <strong>http://localhost:3000</strong>.</p>';
+            var netMsg =
+              typeof location !== "undefined" &&
+              location.hostname &&
+              /\.github\.io$/i.test(location.hostname)
+                ? "Could not reach the chat service. Try again in a moment or refresh the page."
+                : 'Could not reach the server. Run <code>npm start</code> in the project folder, then open <strong>http://localhost:3000</strong>.';
+            bodyEl.innerHTML = '<p class="chat-error">' + netMsg + "</p>";
           }
         } else {
           if (bodyEl) {

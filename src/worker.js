@@ -14,13 +14,30 @@ Format every answer with this exact markdown structure:
 
 const MAX_CONVERSATION_MESSAGES = 20;
 
-function jsonResponse(body, status = 200, extraHeaders = {}) {
+function corsHeaders(request) {
+  const origin = request.headers.get("Origin");
+  const headers = {
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Access-Control-Max-Age": "86400",
+  };
+  if (origin) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  } else {
+    headers["Access-Control-Allow-Origin"] = "*";
+  }
+  return headers;
+}
+
+function jsonResponse(body, status = 200, request = null, extraHeaders = {}) {
+  const headers = {
+    "Content-Type": "application/json; charset=utf-8",
+    ...(request ? corsHeaders(request) : {}),
+    ...extraHeaders,
+  };
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      ...extraHeaders,
-    },
+    headers,
   });
 }
 
@@ -34,12 +51,6 @@ function sseHeaders() {
 
 function readClientIp(request) {
   return request.headers.get("CF-Connecting-IP") || "unknown";
-}
-
-function applyCorsHeaders(headers, origin = "*") {
-  headers.set("Access-Control-Allow-Origin", origin);
-  headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  headers.set("Access-Control-Allow-Headers", "Content-Type");
 }
 
 function buildApiMessages(messages) {
@@ -132,9 +143,7 @@ export default {
     const method = request.method.toUpperCase();
 
     if (url.pathname === "/api/chat" && method === "OPTIONS") {
-      const response = new Response(null, { status: 204 });
-      applyCorsHeaders(response.headers);
-      return response;
+      return new Response(null, { status: 204, headers: corsHeaders(request) });
     }
 
     if (url.pathname !== "/api/chat") {
@@ -142,19 +151,19 @@ export default {
     }
 
     if (method !== "POST") {
-      return jsonResponse({ error: "Method not allowed" }, 405);
+      return jsonResponse({ error: "Method not allowed" }, 405, request);
     }
 
     let body;
     try {
       body = await request.json();
     } catch {
-      return jsonResponse({ error: "Invalid JSON body" }, 400);
+      return jsonResponse({ error: "Invalid JSON body" }, 400, request);
     }
 
     const messages = body?.messages;
     if (!Array.isArray(messages) || messages.length === 0) {
-      return jsonResponse({ error: "messages array is required" }, 400);
+      return jsonResponse({ error: "messages array is required" }, 400, request);
     }
 
     if (!env.OPENAI_API_KEY) {
@@ -163,7 +172,8 @@ export default {
           error:
             "Missing OPENAI_API_KEY in Worker secrets. Set it with: wrangler secret put OPENAI_API_KEY",
         },
-        503
+        503,
+        request
       );
     }
 
@@ -193,12 +203,13 @@ export default {
       } catch {
         // Keep generic detail.
       }
-      return jsonResponse({ error: detail }, 502);
+      return jsonResponse({ error: detail }, 502, request);
     }
 
     const bodyStream = await streamOpenAIToClient(upstream);
-    const response = new Response(bodyStream, { headers: sseHeaders() });
-    applyCorsHeaders(response.headers);
+    const response = new Response(bodyStream, {
+      headers: { ...sseHeaders(), ...corsHeaders(request) },
+    });
     return response;
   },
 };
