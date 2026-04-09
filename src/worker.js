@@ -87,11 +87,20 @@ async function bodyTextFromResponse(res) {
   }
 }
 
-function openAiHeaders(env) {
+function openAiBaseUrl(env) {
+  return String(env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(
+    /\/+$/,
+    ""
+  );
+}
+
+/** Auth + optional org/project. Use for GET; add Content-Type for POST JSON. */
+function openAiAuthHeaders(env) {
   const key = String(env.OPENAI_API_KEY || "").trim();
   const headers = {
     Authorization: `Bearer ${key}`,
-    "Content-Type": "application/json",
+    Accept: "application/json",
+    "User-Agent": "james-portfolio-chat-worker/1.0",
   };
   if (env.OPENAI_ORG_ID && String(env.OPENAI_ORG_ID).trim()) {
     headers["OpenAI-Organization"] = String(env.OPENAI_ORG_ID).trim();
@@ -100,6 +109,32 @@ function openAiHeaders(env) {
     headers["OpenAI-Project"] = String(env.OPENAI_PROJECT_ID).trim();
   }
   return headers;
+}
+
+function openAiHeaders(env) {
+  return {
+    ...openAiAuthHeaders(env),
+    "Content-Type": "application/json",
+  };
+}
+
+/** GET /v1/models — proves key + base URL + org/project headers work. */
+async function probeModelsList(env) {
+  const base = openAiBaseUrl(env);
+  const r = await fetch(`${base}/models`, {
+    method: "GET",
+    headers: openAiAuthHeaders(env),
+  });
+  const text = await bodyTextFromResponse(r);
+  return {
+    modelsStatus: r.status,
+    modelsLen: text.length,
+    modelsPreview: text.slice(0, 500),
+    modelsRequestId:
+      r.headers.get("openai-request-id") ||
+      r.headers.get("x-request-id") ||
+      null,
+  };
 }
 
 function parseOpenAIErrorBody(text) {
@@ -154,7 +189,7 @@ function wantsDebug(request, env) {
 }
 
 async function fetchOpenAIChat(env, payload) {
-  const url = "https://api.openai.com/v1/chat/completions";
+  const url = `${openAiBaseUrl(env)}/chat/completions`;
   const h = openAiHeaders(env);
   let firstErrorText = null;
   let res = await fetch(url, {
@@ -180,7 +215,7 @@ async function fetchOpenAIChat(env, payload) {
 
 /** Minimal non-stream call to isolate key/model vs. full chat payload. */
 async function probeOpenAIKey(env) {
-  const url = "https://api.openai.com/v1/chat/completions";
+  const url = `${openAiBaseUrl(env)}/chat/completions`;
   const h = openAiHeaders(env);
   const model = (env.OPENAI_CHAT_MODEL || "gpt-4o-mini").trim();
   const r = await fetch(url, {
@@ -351,11 +386,11 @@ export default {
       );
     }
 
-    if (!env.OPENAI_API_KEY) {
+    if (!env.OPENAI_API_KEY || !String(env.OPENAI_API_KEY).trim()) {
       return jsonResponse(
         {
           error:
-            "Missing OPENAI_API_KEY in Worker secrets. Set it with: wrangler secret put OPENAI_API_KEY",
+            "Missing or empty OPENAI_API_KEY. Set it with: wrangler secret put OPENAI_API_KEY (paste key with no extra spaces or newlines).",
         },
         503,
         request
@@ -425,13 +460,24 @@ export default {
         (upstream.status === 400 || upstream.status === 401)
       ) {
         try {
-          probe = await probeOpenAIKey(env);
-          if (probe.probePreview && probe.probeStatus !== 200) {
+          const ping = await probeOpenAIKey(env);
+          const models = await probeModelsList(env);
+          probe = { ...ping, ...models };
+
+          if (models.modelsStatus === 401) {
             detail =
-              parseOpenAIErrorBody(probe.probePreview) ||
-              probe.probePreview.slice(0, 400) ||
+              "GET /v1/models returned 401 — the API key is rejected. Re-create the secret (no newline), or add OPENAI_ORG_ID / OPENAI_PROJECT_ID if your key is org- or project-scoped.";
+          } else if (models.modelsStatus === 200 && models.modelsLen > 0) {
+            detail =
+              "The API key works (GET /v1/models returned data), but POST /chat/completions returned HTTP " +
+              upstream.status +
+              " with an empty body. If your key is project-scoped, set Worker secrets OPENAI_PROJECT_ID (and OPENAI_ORG_ID if required). Otherwise verify OPENAI_CHAT_MODEL matches an available model id.";
+          } else if (ping.probePreview && ping.probeStatus !== 200) {
+            detail =
+              parseOpenAIErrorBody(ping.probePreview) ||
+              ping.probePreview.slice(0, 400) ||
               detail;
-          } else if (probe.probeStatus === 200) {
+          } else if (ping.probeStatus === 200) {
             detail =
               "OpenAI returned empty error bodies for the chat request, but a minimal ping with the same model succeeded. The problem is likely the system prompt size, total message length, or message shape — not the API key.";
           }

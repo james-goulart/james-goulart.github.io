@@ -14,6 +14,8 @@ npx wrangler login
 npx wrangler secret put OPENAI_API_KEY
 ```
 
+If the key is **project-scoped**, also run `npx wrangler secret put OPENAI_PROJECT_ID` and (if required) `OPENAI_ORG_ID` with the ids from [platform.openai.com](https://platform.openai.com). Missing project headers often produce HTTP 400 with an empty response body on `POST /chat/completions`.
+
 ## 2) Deploy
 
 ```bash
