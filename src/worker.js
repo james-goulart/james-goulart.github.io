@@ -53,6 +53,13 @@ function readClientIp(request) {
   return request.headers.get("CF-Connecting-IP") || "unknown";
 }
 
+/** OpenAI `user` must be <= 64 chars (long IPv6 / headers otherwise cause HTTP 400). */
+function openAiUserId(request) {
+  var id = readClientIp(request);
+  if (id.length <= 64) return id;
+  return id.slice(0, 64);
+}
+
 function buildApiMessages(messages) {
   return [
     { role: "system", content: SYSTEM_PROMPT },
@@ -177,13 +184,23 @@ export default {
       );
     }
 
+    const apiMessages = buildApiMessages(messages);
+    const nonSystem = apiMessages.filter((m) => m.role !== "system");
+    if (nonSystem.length === 0) {
+      return jsonResponse(
+        { error: "Send at least one non-empty user or assistant message." },
+        400,
+        request
+      );
+    }
+
     const openAiPayload = {
       model: (env.OPENAI_CHAT_MODEL || "gpt-4o-mini").trim(),
-      messages: buildApiMessages(messages),
+      messages: apiMessages,
       max_tokens: 1024,
       temperature: 0.4,
       stream: true,
-      user: readClientIp(request),
+      user: openAiUserId(request),
     };
 
     const upstream = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -198,8 +215,15 @@ export default {
     if (!upstream.ok) {
       let detail = `OpenAI request failed (${upstream.status})`;
       try {
-        const errJson = await upstream.json();
-        if (errJson?.error?.message) detail = errJson.error.message;
+        const errText = await upstream.text();
+        const errJson = JSON.parse(errText);
+        if (errJson?.error?.message) {
+          detail = errJson.error.message;
+        } else if (typeof errJson?.error === "string") {
+          detail = errJson.error;
+        } else if (errText) {
+          detail = errText.slice(0, 500);
+        }
       } catch {
         // Keep generic detail.
       }
