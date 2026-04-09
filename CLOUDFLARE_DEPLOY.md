@@ -31,3 +31,15 @@ Add these repository secrets:
 - `CLOUDFLARE_ACCOUNT_ID`
 
 Then use the workflow file in `.github/workflows/deploy-worker.yml`.
+
+## 4) Debugging OpenAI / 400 errors
+
+1. **Live logs** — In a terminal (logged in with Wrangler), run:
+   ```bash
+   npx wrangler tail james-portfolio-chat
+   ```
+   Send a chat message; failed OpenAI calls log `firstError` / `lastError` snippets and metadata.
+
+2. **Verbose JSON in the browser** — In the Cloudflare dashboard → Worker → Settings → Variables, add variable `CHAT_DEBUG` = `1` (or `true`), save, redeploy. The next `/api/chat` error response includes a `debug` object with raw error snippets. Remove when done.
+
+3. **Header-based debug** — Set Worker secret `CHAT_DEBUG_SECRET` to a random string, then send header `X-Chat-Debug: <same string>` on POST `/api/chat` (e.g. curl or DevTools “Edit and resend”) to get the same `debug` payload without turning on global `CHAT_DEBUG`.

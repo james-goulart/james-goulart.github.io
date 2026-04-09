@@ -18,7 +18,7 @@ function corsHeaders(request) {
   const origin = request.headers.get("Origin");
   const headers = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, X-Chat-Debug",
     "Access-Control-Max-Age": "86400",
   };
   if (origin) {
@@ -88,15 +88,48 @@ function openAiHeaders(env) {
 }
 
 function parseOpenAIErrorBody(text) {
-  if (!text || !String(text).trim()) return null;
+  const s = parseOpenAIErrorStructured(text);
+  return s.message || null;
+}
+
+/** Returns { message, code, param, type } from OpenAI JSON error body. */
+function parseOpenAIErrorStructured(text) {
+  const out = { message: null, code: null, param: null, type: null };
+  if (!text || !String(text).trim()) return out;
   try {
     const j = JSON.parse(text);
-    if (j?.error?.message) return String(j.error.message);
-    if (typeof j.error === "string") return j.error;
-    return String(text).slice(0, 800);
+    const e = j.error;
+    if (typeof e === "object" && e) {
+      out.message = e.message ? String(e.message) : null;
+      out.code = e.code != null ? String(e.code) : null;
+      out.param = e.param != null ? String(e.param) : null;
+      out.type = e.type != null ? String(e.type) : null;
+      return out;
+    }
+    if (typeof e === "string") {
+      out.message = e;
+      return out;
+    }
   } catch {
-    return String(text).slice(0, 800);
+    /* fall through */
   }
+  out.message = String(text).slice(0, 800);
+  return out;
+}
+
+function mergeOpenAIMeta(a, b) {
+  return {
+    code: a.code || b.code || null,
+    param: a.param || b.param || null,
+    type: a.type || b.type || null,
+  };
+}
+
+function wantsDebug(request, env) {
+  if (env.CHAT_DEBUG === "1" || env.CHAT_DEBUG === "true") return true;
+  const secret = env.CHAT_DEBUG_SECRET && String(env.CHAT_DEBUG_SECRET).trim();
+  if (secret && request.headers.get("X-Chat-Debug") === secret) return true;
+  return false;
 }
 
 async function fetchOpenAIChat(env, payload) {
@@ -310,15 +343,38 @@ export default {
 
     if (!upstream.ok) {
       const errText = await upstream.text();
+      const firstS = parseOpenAIErrorStructured(firstErrorText);
+      const lastS = parseOpenAIErrorStructured(errText);
       const detail =
-        parseOpenAIErrorBody(firstErrorText) ||
-        parseOpenAIErrorBody(errText) ||
+        firstS.message ||
+        lastS.message ||
         `OpenAI request failed (${upstream.status})`;
-      return jsonResponse(
-        { error: detail, upstreamStatus: upstream.status },
-        502,
-        request
-      );
+      const openai = mergeOpenAIMeta(firstS, lastS);
+
+      console.error("[chat] OpenAI error", {
+        upstreamStatus: upstream.status,
+        model: openAiPayload.model,
+        messageCount: apiMessages.length,
+        firstError: (firstErrorText || "").slice(0, 1500),
+        lastError: (errText || "").slice(0, 1500),
+        openai,
+      });
+
+      const body = {
+        error: detail,
+        upstreamStatus: upstream.status,
+        openai:
+          openai.code || openai.param || openai.type ? openai : undefined,
+      };
+      if (wantsDebug(request, env)) {
+        body.debug = {
+          model: openAiPayload.model,
+          messageCount: apiMessages.length,
+          firstErrorSnippet: (firstErrorText || "").slice(0, 800),
+          lastErrorSnippet: (errText || "").slice(0, 800),
+        };
+      }
+      return jsonResponse(body, 502, request);
     }
 
     const bodyStream = await streamOpenAIToClient(upstream);

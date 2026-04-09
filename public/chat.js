@@ -484,6 +484,19 @@
                 var parsed = JSON.parse(errBody);
                 if (parsed && parsed.error) detail = String(parsed.error);
                 else detail = errBody.slice(0, 500);
+                if (parsed && parsed.openai) {
+                  var o = parsed.openai;
+                  if (o.code || o.param || o.type) {
+                    detail +=
+                      " [" +
+                      [o.type, o.code, o.param].filter(Boolean).join(" · ") +
+                      "]";
+                  }
+                }
+                if (parsed && parsed.debug) {
+                  detail +=
+                    "\n\n" + JSON.stringify(parsed.debug, null, 2);
+                }
               } catch (parseErr) {
                 detail = errBody.slice(0, 500);
               }
@@ -564,7 +577,9 @@
         } else {
           if (bodyEl) {
             bodyEl.innerHTML =
-              '<p class="chat-error">' + escapeHtml(raw) + "</p>";
+              '<p class="chat-error">' +
+              escapeHtml(raw).replace(/\n/g, "<br>") +
+              "</p>";
           }
         }
         finishStream();
