@@ -457,6 +457,7 @@
     }
 
     var accumulated = "";
+    var streamHadError = false;
     var streamFinalized = false;
 
     if (location.protocol === "file:") {
@@ -513,14 +514,9 @@
             }
             try {
               var data = JSON.parse(payload);
-              if (data.content) {
-                accumulated += data.content;
-                if (bodyEl) {
-                  bodyEl.innerHTML = renderMarkdown(accumulated);
-                }
-                scrollToBottom();
-              }
               if (data.error) {
+                streamHadError = true;
+                accumulated = "";
                 if (bodyEl) {
                   bodyEl.innerHTML =
                     '<p class="chat-error">' +
@@ -529,6 +525,13 @@
                 }
                 finishStream();
                 return;
+              }
+              if (data.content) {
+                accumulated += data.content;
+                if (bodyEl) {
+                  bodyEl.innerHTML = renderMarkdown(accumulated);
+                }
+                scrollToBottom();
               }
             } catch (e) {}
           }
@@ -539,6 +542,8 @@
       })
       .catch(function (err) {
         console.error("Chat error:", err);
+        streamHadError = true;
+        accumulated = "";
         var raw =
           err && err.message
             ? err.message
@@ -568,7 +573,7 @@
     function finishStream() {
       if (streamFinalized) return;
       streamFinalized = true;
-      if (accumulated) {
+      if (accumulated && !streamHadError) {
         messages.push({ role: "assistant", content: accumulated });
         if (bodyEl) {
           wireFollowUpChips(bodyEl);

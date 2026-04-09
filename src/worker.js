@@ -87,30 +87,41 @@ function openAiHeaders(env) {
   return headers;
 }
 
+function parseOpenAIErrorBody(text) {
+  if (!text || !String(text).trim()) return null;
+  try {
+    const j = JSON.parse(text);
+    if (j?.error?.message) return String(j.error.message);
+    if (typeof j.error === "string") return j.error;
+    return String(text).slice(0, 800);
+  } catch {
+    return String(text).slice(0, 800);
+  }
+}
+
 async function fetchOpenAIChat(env, payload) {
   const url = "https://api.openai.com/v1/chat/completions";
   const h = openAiHeaders(env);
+  let firstErrorText = null;
   let res = await fetch(url, {
     method: "POST",
     headers: h,
     body: JSON.stringify(payload),
   });
   if (res.status === 400) {
-    await res.text().catch(() => {});
+    firstErrorText = await res.text();
     const minimal = {
       model: payload.model,
       messages: payload.messages,
       stream: true,
     };
-    const res2 = await fetch(url, {
+    res = await fetch(url, {
       method: "POST",
       headers: h,
       body: JSON.stringify(minimal),
     });
-    if (res2.ok) return res2;
-    return res2;
   }
-  return res;
+  return { res, firstErrorText };
 }
 
 async function streamOpenAIToClient(openAIResponse) {
@@ -159,7 +170,22 @@ async function streamOpenAIToClient(openAIResponse) {
               await writer.close();
               return;
             }
-            const delta = data?.choices?.[0]?.delta?.content;
+            const choice = data?.choices?.[0];
+            const d = choice?.delta;
+            const refusal = d?.refusal || choice?.message?.refusal;
+            if (refusal) {
+              await writer.write(
+                encoder.encode(
+                  `data: ${JSON.stringify({
+                    error: String(refusal).slice(0, 500),
+                  })}\n\n`
+                )
+              );
+              await writer.write(encoder.encode("data: [DONE]\n\n"));
+              await writer.close();
+              return;
+            }
+            const delta = d?.content;
             if (delta) {
               sentAny = true;
               await writer.write(
@@ -277,23 +303,17 @@ export default {
       stream: true,
     };
 
-    const upstream = await fetchOpenAIChat(env, openAiPayload);
+    const { res: upstream, firstErrorText } = await fetchOpenAIChat(
+      env,
+      openAiPayload
+    );
 
     if (!upstream.ok) {
-      let detail = `OpenAI request failed (${upstream.status})`;
-      try {
-        const errText = await upstream.text();
-        const errJson = JSON.parse(errText);
-        if (errJson?.error?.message) {
-          detail = errJson.error.message;
-        } else if (typeof errJson?.error === "string") {
-          detail = errJson.error;
-        } else if (errText) {
-          detail = errText.slice(0, 500);
-        }
-      } catch {
-        // Keep generic detail.
-      }
+      const errText = await upstream.text();
+      const detail =
+        parseOpenAIErrorBody(firstErrorText) ||
+        parseOpenAIErrorBody(errText) ||
+        `OpenAI request failed (${upstream.status})`;
       return jsonResponse(
         { error: detail, upstreamStatus: upstream.status },
         502,
