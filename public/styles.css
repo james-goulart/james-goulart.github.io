@@ -1797,21 +1797,17 @@ a:hover {
   font-weight: 700;
 }
 
-/* Experience page layout (aligned with case-layout) */
-.exp-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
-  gap: 2rem 2.5rem;
-  align-items: start;
+/* Experience page: stacked panels, then case cards (1 col mobile, 2 col desktop) */
+.exp-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.exp-layout__main {
-  min-width: 0;
-}
-
-.exp-aside {
-  position: sticky;
-  top: 5.25rem;
+.exp-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .exp-aside__section {
@@ -1844,6 +1840,8 @@ a:hover {
   color: var(--text);
 }
 
+.exp-panels .org-scope-list,
+.exp-panels .highlights-list,
 .exp-aside .org-scope-list,
 .exp-aside .highlights-list {
   font-size: 0.85rem;

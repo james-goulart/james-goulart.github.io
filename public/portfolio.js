@@ -1041,6 +1041,44 @@ const Portfolio = (function () {
     });
   }
 
+  function caseCardHtml(exp, caseItem) {
+    var companyLogo = companyCardLogoSrc(exp);
+    var logoHtml = companyLogo
+      ? '<img class="card__logo card__logo--case" src="' +
+        escapeHtml(companyLogo) +
+        '" alt="" width="120" height="32" loading="lazy" />'
+      : '<span class="card__company">' + escapeHtml(exp.company) + "</span>";
+    var relatedNewsHtml =
+      caseItem.relatedNews && caseItem.relatedNews.length
+        ? '<section class="case-card__news"><h3>Related News</h3><ul class="case-card__news-list">' +
+          caseItem.relatedNews.map(function (u) {
+            var raw = String(u || "").trim();
+            return (
+              '<li><a href="' +
+              escapeHtml(raw) +
+              '" target="_blank" rel="noopener noreferrer">' +
+              escapeHtml(relatedNewsTitleEn(raw) || raw) +
+              "</a></li>"
+            );
+          }).join("") +
+          "</ul></section>"
+        : "";
+    return (
+      '<article class="card card--case">' +
+      logoHtml +
+      '<a class="card__company card__company--case-link" href="case.html#' +
+      encodeURIComponent(caseItem.id) +
+      '">' +
+      escapeHtml(caseItem.name) +
+      "</a>" +
+      '<span class="card__role">' +
+      roleHtmlWithSubtitle(exp, "card__role-text") +
+      "</span>" +
+      relatedNewsHtml +
+      "</article>"
+    );
+  }
+
   function caseIndexFromId(caseId) {
     if (!DATA.experiences) return -1;
     for (let i = 0; i < DATA.experiences.length; i++) {
@@ -1109,8 +1147,14 @@ const Portfolio = (function () {
           "</div></section>"
         : "";
 
-    const casesHtml = exp.cases
-      .map(function (c) {
+    var caseRows = [];
+    (exp.cases || []).forEach(function (c) {
+      caseRows.push({ experience: exp, caseItem: c });
+    });
+    sortCasesLikeNav(caseRows);
+    const casesHtml = caseRows
+      .map(function (row) {
+        var c = row.caseItem;
         const narr = c.narrative || "";
         const body =
           narr && narr.trim()
@@ -1147,37 +1191,40 @@ const Portfolio = (function () {
       })
       .join("");
 
-    // Build sidebar content (similar to case-aside)
+    const highlightsPane =
+      exp.highlights && exp.highlights.length
+        ? '<div class="exp-aside__section"><h3>Highlights</h3>' + renderHighlights(exp.highlights) + "</div>"
+        : "";
     const scopePane = exp.orgScope
       ? '<div class="exp-aside__section"><h3>Org Scope</h3>' + renderOrgScope(exp.orgScope) + "</div>"
-      : "";
-    const highlightsPane = exp.highlights && exp.highlights.length
-      ? '<div class="exp-aside__section"><h3>Highlights</h3>' + renderHighlights(exp.highlights) + "</div>"
       : "";
     const aboutText = orgAboutText(exp);
     const aboutPane = aboutText
       ? '<div class="exp-aside__section"><h3>About ' + escapeHtml(exp.company) + '</h3><p>' + escapeHtml(aboutText) + "</p></div>"
       : "";
-    
-    const sidebarContent = scopePane + highlightsPane + aboutPane;
-    const asideBlock = sidebarContent
-      ? '<aside class="exp-aside">' + sidebarContent + '</aside>'
-      : "";
 
-    // Build main content with cases styled like case-layout__main
+    const panelsInner = highlightsPane + scopePane + aboutPane;
+    const panelsBlock = panelsInner ? '<div class="exp-panels">' + panelsInner + "</div>" : "";
+
     const academicBlock =
       exp.id === "unicamp-bsc-electrical-engineering"
         ? '<section class="exp-section"><h2>Term paper</h2><p><a href="https://drive.google.com/file/d/12Nh6eFgCoI2W56X9sVIkH80rgE5B-ufb/view?usp=sharing" target="_blank" rel="noopener noreferrer">Read the Unicamp term paper</a></p></section>'
         : "";
 
-    const mainContent = (casesHtml || legacyBlock)
-      ? '<div class="exp-layout__main">' +
-        (casesHtml || legacyBlock) +
-        academicBlock +
-        '</div>'
-      : legacyBlock
-        ? '<div class="exp-layout__main">' + legacyBlock + academicBlock + '</div>'
-        : '<div class="exp-layout__main"><p class="muted">No separate case rows for this role in the spreadsheet yet.</p></div>';
+    var expPageParts = [];
+    if (panelsBlock) expPageParts.push(panelsBlock);
+    if (caseRows.length) {
+      expPageParts.push(
+        '<div class="exp-case-stories" aria-label="Cases">' + casesHtml + "</div>"
+      );
+    } else if (legacyBlock) {
+      expPageParts.push(legacyBlock);
+    } else {
+      expPageParts.push(
+        '<p class="muted">No separate case rows for this role in the spreadsheet yet.</p>'
+      );
+    }
+    if (academicBlock) expPageParts.push(academicBlock);
 
     main.innerHTML =
       '<header class="page-head">' +
@@ -1191,10 +1238,9 @@ const Portfolio = (function () {
         : "") +
       (exp.track ? "<li><strong>Track</strong> " + escapeHtml(exp.track) + "</li>" : "") +
       "</ul></header>" +
-      '<div class="exp-layout">' +
-      mainContent +
-      asideBlock +
-      '</div>';
+      '<div class="exp-page">' +
+      expPageParts.join("") +
+      "</div>";
   }
 
   function locationLineHtml(exp) {
@@ -1310,35 +1356,7 @@ const Portfolio = (function () {
     sortCasesLikeNav(filtered);
     const cards = filtered
       .map(function (x) {
-        var companyLogo = companyCardLogoSrc(x.experience);
-        var logoHtml = companyLogo
-          ? '<img class="card__logo card__logo--case" src="' +
-            escapeHtml(companyLogo) +
-            '" alt="" width="120" height="32" loading="lazy" />'
-          : '<span class="card__company">' + escapeHtml(x.experience.company) + "</span>";
-        var relatedNewsHtml =
-          x.caseItem.relatedNews && x.caseItem.relatedNews.length
-            ? '<section class="case-card__news"><h3>Related News</h3><ul class="case-card__news-list">' +
-              x.caseItem.relatedNews.map(function (u) {
-                var raw = String(u || "").trim();
-                return '<li><a href="' + escapeHtml(raw) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(relatedNewsTitleEn(raw) || raw) + "</a></li>";
-              }).join("") +
-              "</ul></section>"
-            : "";
-        return (
-          '<article class="card card--case">' +
-          logoHtml +
-          '<a class="card__company card__company--case-link" href="case.html#' +
-          encodeURIComponent(x.caseItem.id) +
-          '">' +
-          escapeHtml(x.caseItem.name) +
-          "</a>" +
-          '<span class="card__role">' +
-          roleHtmlWithSubtitle(x.experience, "card__role-text") +
-          "</span>" +
-          relatedNewsHtml +
-          "</article>"
-        );
+        return caseCardHtml(x.experience, x.caseItem);
       })
       .join("");
 
