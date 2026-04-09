@@ -49,25 +49,68 @@ function sseHeaders() {
   };
 }
 
-function readClientIp(request) {
-  return request.headers.get("CF-Connecting-IP") || "unknown";
-}
-
-/** OpenAI `user` must be <= 64 chars (long IPv6 / headers otherwise cause HTTP 400). */
-function openAiUserId(request) {
-  var id = readClientIp(request);
-  if (id.length <= 64) return id;
-  return id.slice(0, 64);
+function normalizeClientMessages(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (let i = 0; i < raw.length; i++) {
+    const m = raw[i];
+    if (!m || typeof m !== "object") continue;
+    const role = m.role === "assistant" ? "assistant" : "user";
+    const content = String(m.content ?? m.text ?? "").trim();
+    if (!content) continue;
+    out.push({ role, content: content.slice(0, 2000) });
+  }
+  return out.slice(-MAX_CONVERSATION_MESSAGES);
 }
 
 function buildApiMessages(messages) {
   return [
     { role: "system", content: SYSTEM_PROMPT },
-    ...messages.slice(-MAX_CONVERSATION_MESSAGES).map((m) => ({
-      role: m?.role === "assistant" ? "assistant" : "user",
-      content: String(m?.content || "").slice(0, 2000),
+    ...messages.map((m) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: String(m.content || "").slice(0, 2000),
     })),
   ].filter((m) => m.role === "system" || String(m.content || "").trim().length > 0);
+}
+
+function openAiHeaders(env) {
+  const headers = {
+    Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+    "Content-Type": "application/json",
+  };
+  if (env.OPENAI_ORG_ID && String(env.OPENAI_ORG_ID).trim()) {
+    headers["OpenAI-Organization"] = String(env.OPENAI_ORG_ID).trim();
+  }
+  if (env.OPENAI_PROJECT_ID && String(env.OPENAI_PROJECT_ID).trim()) {
+    headers["OpenAI-Project"] = String(env.OPENAI_PROJECT_ID).trim();
+  }
+  return headers;
+}
+
+async function fetchOpenAIChat(env, payload) {
+  const url = "https://api.openai.com/v1/chat/completions";
+  const h = openAiHeaders(env);
+  let res = await fetch(url, {
+    method: "POST",
+    headers: h,
+    body: JSON.stringify(payload),
+  });
+  if (res.status === 400) {
+    await res.text().catch(() => {});
+    const minimal = {
+      model: payload.model,
+      messages: payload.messages,
+      stream: true,
+    };
+    const res2 = await fetch(url, {
+      method: "POST",
+      headers: h,
+      body: JSON.stringify(minimal),
+    });
+    if (res2.ok) return res2;
+    return res2;
+  }
+  return res;
 }
 
 async function streamOpenAIToClient(openAIResponse) {
@@ -104,6 +147,18 @@ async function streamOpenAIToClient(openAIResponse) {
 
           try {
             const data = JSON.parse(payload);
+            if (data.error) {
+              const errMsg =
+                typeof data.error === "object" && data.error?.message
+                  ? data.error.message
+                  : String(data.error);
+              await writer.write(
+                encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`)
+              );
+              await writer.write(encoder.encode("data: [DONE]\n\n"));
+              await writer.close();
+              return;
+            }
             const delta = data?.choices?.[0]?.delta?.content;
             if (delta) {
               sentAny = true;
@@ -168,9 +223,13 @@ export default {
       return jsonResponse({ error: "Invalid JSON body" }, 400, request);
     }
 
-    const messages = body?.messages;
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return jsonResponse({ error: "messages array is required" }, 400, request);
+    const rawMessages = body?.messages;
+    if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
+      return jsonResponse(
+        { error: "messages array is required", code: "NO_MESSAGES" },
+        400,
+        request
+      );
     }
 
     if (!env.OPENAI_API_KEY) {
@@ -184,11 +243,27 @@ export default {
       );
     }
 
-    const apiMessages = buildApiMessages(messages);
+    const normalized = normalizeClientMessages(rawMessages);
+    if (normalized.length === 0) {
+      return jsonResponse(
+        {
+          error:
+            "Send at least one message with non-empty content (role + content).",
+          code: "EMPTY_MESSAGES",
+        },
+        400,
+        request
+      );
+    }
+
+    const apiMessages = buildApiMessages(normalized);
     const nonSystem = apiMessages.filter((m) => m.role !== "system");
     if (nonSystem.length === 0) {
       return jsonResponse(
-        { error: "Send at least one non-empty user or assistant message." },
+        {
+          error: "Send at least one non-empty user or assistant message.",
+          code: "NO_TURNS",
+        },
         400,
         request
       );
@@ -200,17 +275,9 @@ export default {
       max_tokens: 1024,
       temperature: 0.4,
       stream: true,
-      user: openAiUserId(request),
     };
 
-    const upstream = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(openAiPayload),
-    });
+    const upstream = await fetchOpenAIChat(env, openAiPayload);
 
     if (!upstream.ok) {
       let detail = `OpenAI request failed (${upstream.status})`;
@@ -227,7 +294,11 @@ export default {
       } catch {
         // Keep generic detail.
       }
-      return jsonResponse({ error: detail }, 502, request);
+      return jsonResponse(
+        { error: detail, upstreamStatus: upstream.status },
+        502,
+        request
+      );
     }
 
     const bodyStream = await streamOpenAIToClient(upstream);

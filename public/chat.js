@@ -477,9 +477,17 @@
         if (!res.ok) {
           var detail = "Request failed (" + res.status + ").";
           try {
-            var j = await res.json();
-            if (j && j.error) detail = j.error;
-          } catch (e) {}
+            var errBody = await res.text();
+            if (errBody) {
+              try {
+                var parsed = JSON.parse(errBody);
+                if (parsed && parsed.error) detail = String(parsed.error);
+                else detail = errBody.slice(0, 500);
+              } catch (parseErr) {
+                detail = errBody.slice(0, 500);
+              }
+            }
+          } catch (readErr) {}
           throw new Error(detail);
         }
         var reader = res.body.getReader();
