@@ -104,6 +104,12 @@ function parseOpenAIErrorStructured(text) {
       out.code = e.code != null ? String(e.code) : null;
       out.param = e.param != null ? String(e.param) : null;
       out.type = e.type != null ? String(e.type) : null;
+      if (!out.message && (out.code || out.type || out.param)) {
+        out.message = [out.type, out.code, out.param].filter(Boolean).join(" · ");
+      }
+      if (!out.message) {
+        out.message = JSON.stringify(e).slice(0, 500);
+      }
       return out;
     }
     if (typeof e === "string") {
@@ -345,11 +351,17 @@ export default {
       const errText = await upstream.text();
       const firstS = parseOpenAIErrorStructured(firstErrorText);
       const lastS = parseOpenAIErrorStructured(errText);
+      const openai = mergeOpenAIMeta(firstS, lastS);
+      const rawFallback =
+        (firstErrorText && String(firstErrorText).trim()
+          ? String(firstErrorText).slice(0, 800)
+          : "") ||
+        (errText && String(errText).trim() ? String(errText).slice(0, 800) : "");
       const detail =
         firstS.message ||
         lastS.message ||
+        rawFallback ||
         `OpenAI request failed (${upstream.status})`;
-      const openai = mergeOpenAIMeta(firstS, lastS);
 
       console.error("[chat] OpenAI error", {
         upstreamStatus: upstream.status,
@@ -358,11 +370,18 @@ export default {
         firstError: (firstErrorText || "").slice(0, 1500),
         lastError: (errText || "").slice(0, 1500),
         openai,
+        detail,
       });
 
       const body = {
         error: detail,
         upstreamStatus: upstream.status,
+        diagnostics: {
+          firstLen: (firstErrorText || "").length,
+          lastLen: (errText || "").length,
+          firstPreview: (firstErrorText || "").slice(0, 400),
+          lastPreview: (errText || "").slice(0, 400),
+        },
         openai:
           openai.code || openai.param || openai.type ? openai : undefined,
       };

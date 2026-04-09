@@ -493,6 +493,10 @@
                       "]";
                   }
                 }
+                if (parsed && parsed.diagnostics) {
+                  detail +=
+                    "\n\n" + JSON.stringify(parsed.diagnostics, null, 2);
+                }
                 if (parsed && parsed.debug) {
                   detail +=
                     "\n\n" + JSON.stringify(parsed.debug, null, 2);
