@@ -1,0 +1,10 @@
+name = "james-portfolio-chat"
+main = "src/worker.js"
+compatibility_date = "2026-04-09"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[vars]
+OPENAI_CHAT_MODEL = "gpt-4o-mini"

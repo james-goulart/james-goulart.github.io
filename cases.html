@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   </head>
   <body>
     <header id="site-nav" class="site-nav" aria-label="Primary"></header>
@@ -18,9 +19,19 @@
     <script src="./data.js"></script>
     <script src="./portfolio.js"></script>
     <script>
+      window.JamesCVBotConfig = window.JamesCVBotConfig || {};
+      window.JamesCVBotConfig.chatBackendUrl =
+        "https://james-portfolio-chat.james-portfolio-chat.workers.dev";
+    </script>
+    <script src="./chat.js"></script>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
-        Portfolio.injectNav(document.getElementById("site-nav"), "cases");
-        Portfolio.renderCasesIndex(document.getElementById("main"));
+        Portfolio.injectNav(document.getElementById("site-nav"), "home");
+        Portfolio.renderHome(document.getElementById("main"));
+        var chatRoot = document.getElementById("chat-root");
+        if (chatRoot && window.JamesCVBot) {
+          JamesCVBot.init(chatRoot);
+        }
       });
     </script>
   </body>
