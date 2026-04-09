@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Experience — James Goulart</title>
+    <title>James Goulart - Product Leader</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -28,14 +28,7 @@
           Portfolio.renderExperiencesIndex(document.getElementById("main"));
         }
         var t = document.querySelector("title");
-        if (id && Portfolio.DATA) {
-          var exp = Portfolio.DATA.experiences.find(function (e) {
-            return e.id === id;
-          });
-          if (exp && t) t.textContent = exp.company + " — " + exp.role;
-        } else if (t) {
-          t.textContent = "Experiences — James Goulart";
-        }
+        if (t) t.textContent = "James Goulart - Product Leader";
       }
       document.addEventListener("DOMContentLoaded", go);
       window.addEventListener("hashchange", go);

@@ -1375,6 +1375,71 @@ a:hover {
   font-weight: 700;
 }
 
+/* Experience page layout (aligned with case-layout) */
+.exp-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 2rem 2.5rem;
+  align-items: start;
+}
+
+.exp-layout__main {
+  min-width: 0;
+}
+
+.exp-aside {
+  position: sticky;
+  top: 5.25rem;
+}
+
+.exp-aside__section {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(42, 38, 34, 0.08);
+}
+
+.exp-aside__section:last-child {
+  margin-bottom: 0;
+}
+
+.exp-aside__section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.75rem;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.exp-aside__section p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.exp-aside .org-scope-list,
+.exp-aside .highlights-list {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.exp-section {
+  margin-top: 2rem;
+}
+
+.exp-section h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
 .news-cards {
   display: flex;
   flex-direction: column;
@@ -1906,15 +1971,20 @@ a:hover {
 
 .case-block {
   margin-top: 0;
-  padding: 1.4rem 1.3rem;
+  padding: 1.25rem;
   border: 1px solid var(--border-light);
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(42, 38, 34, 0.08);
   max-width: none;
 }
 
 .case-block:first-of-type {
   margin-top: 0;
+}
+
+.case-block:hover {
+  box-shadow: 0 4px 12px rgba(42, 38, 34, 0.1);
 }
 
 @media (min-width: 1024px) {
@@ -1924,17 +1994,31 @@ a:hover {
 }
 
 .case-block h2 {
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
   font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
 }
 
 .narrative {
   font-size: 0.98rem;
   line-height: 1.7;
   color: var(--text);
+}
+
+.case-block .narrative {
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.case-block .narrative p {
+  margin: 0.75rem 0;
+}
+
+.case-block .narrative p:first-child {
+  margin-top: 0;
 }
 
 .case-inline-news {

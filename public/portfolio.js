@@ -1091,23 +1091,37 @@
       })
       .join("");
 
+    // Build sidebar content (similar to case-aside)
     const scopePane = exp.orgScope
-      ? '<div class="overview-pane"><h3>Org Scope</h3>' + renderOrgScope(exp.orgScope) + "</div>"
+      ? '<div class="exp-aside__section"><h3>Org Scope</h3>' + renderOrgScope(exp.orgScope) + "</div>"
       : "";
     const highlightsPane = exp.highlights && exp.highlights.length
-      ? '<div class="overview-pane"><h3>Highlights</h3>' + renderHighlights(exp.highlights) + "</div>"
-      : "";
-    const overviewBlock = scopePane || highlightsPane
-      ? '<section class="meta-block meta-block--overview"><div class="overview-grid">' + highlightsPane + scopePane + "</div></section>"
+      ? '<div class="exp-aside__section"><h3>Highlights</h3>' + renderHighlights(exp.highlights) + "</div>"
       : "";
     const aboutText = orgAboutText(exp);
-    const aboutBlock = aboutText
-      ? '<section class="meta-block meta-block--about"><h2>About ' + escapeHtml(exp.company) + '</h2><p>' + escapeHtml(aboutText) + "</p></section>"
+    const aboutPane = aboutText
+      ? '<div class="exp-aside__section"><h3>About ' + escapeHtml(exp.company) + '</h3><p>' + escapeHtml(aboutText) + "</p></div>"
       : "";
+    
+    const sidebarContent = scopePane + highlightsPane + aboutPane;
+    const asideBlock = sidebarContent
+      ? '<aside class="exp-aside">' + sidebarContent + '</aside>'
+      : "";
+
+    // Build main content with cases styled like case-layout__main
     const academicBlock =
       exp.id === "unicamp-bsc-electrical-engineering"
-        ? '<section class="meta-block"><h2>Term paper</h2><p><a href="https://drive.google.com/file/d/12Nh6eFgCoI2W56X9sVIkH80rgE5B-ufb/view?usp=sharing" target="_blank" rel="noopener noreferrer">Read the Unicamp term paper</a></p></section>'
+        ? '<section class="exp-section"><h2>Term paper</h2><p><a href="https://drive.google.com/file/d/12Nh6eFgCoI2W56X9sVIkH80rgE5B-ufb/view?usp=sharing" target="_blank" rel="noopener noreferrer">Read the Unicamp term paper</a></p></section>'
         : "";
+
+    const mainContent = (casesHtml || legacyBlock)
+      ? '<div class="exp-layout__main">' +
+        (casesHtml || legacyBlock) +
+        academicBlock +
+        '</div>'
+      : legacyBlock
+        ? '<div class="exp-layout__main">' + legacyBlock + academicBlock + '</div>'
+        : '<div class="exp-layout__main"><p class="muted">No separate case rows for this role in the spreadsheet yet.</p></div>';
 
     main.innerHTML =
       '<header class="page-head">' +
@@ -1121,16 +1135,10 @@
         : "") +
       (exp.track ? "<li><strong>Track</strong> " + escapeHtml(exp.track) + "</li>" : "") +
       "</ul></header>" +
-      overviewBlock +
-      aboutBlock +
-      academicBlock +
-      (casesHtml
-        ? '<section class="cases-section"><h2 class="sr-only">Cases</h2>' +
-          casesHtml +
-          "</section>"
-        : legacyBlock
-          ? legacyBlock
-          : '<p class="muted">No separate case rows for this role in the spreadsheet yet.</p>');
+      '<div class="exp-layout">' +
+      mainContent +
+      asideBlock +
+      '</div>';
   }
 
   function formatNarrative(text) {
