@@ -94,6 +94,22 @@ function openAiBaseUrl(env) {
   );
 }
 
+/**
+ * Keys starting with sk-proj- are already scoped to one project; sending
+ * OpenAI-Project with a mismatched id can cause empty 400s. Omit unless forced.
+ */
+function shouldSendOpenAIProjectHeader(env, key) {
+  const pid = env.OPENAI_PROJECT_ID && String(env.OPENAI_PROJECT_ID).trim();
+  if (!pid) return false;
+  if (env.OPENAI_FORCE_PROJECT_HEADER === "1" || env.OPENAI_FORCE_PROJECT_HEADER === "true") {
+    return true;
+  }
+  if (key.startsWith("sk-proj-")) {
+    return false;
+  }
+  return true;
+}
+
 /** Auth + optional org/project. Use for GET; add Content-Type for POST JSON. */
 function openAiAuthHeaders(env) {
   const key = String(env.OPENAI_API_KEY || "").trim();
@@ -105,10 +121,22 @@ function openAiAuthHeaders(env) {
   if (env.OPENAI_ORG_ID && String(env.OPENAI_ORG_ID).trim()) {
     headers["OpenAI-Organization"] = String(env.OPENAI_ORG_ID).trim();
   }
-  if (env.OPENAI_PROJECT_ID && String(env.OPENAI_PROJECT_ID).trim()) {
+  if (shouldSendOpenAIProjectHeader(env, key)) {
     headers["OpenAI-Project"] = String(env.OPENAI_PROJECT_ID).trim();
   }
   return headers;
+}
+
+/** Safe hints for diagnostics (no secrets). */
+function openAiEnvHints(env) {
+  const key = String(env.OPENAI_API_KEY || "").trim();
+  return {
+    keyPrefix: key.length >= 7 ? key.slice(0, 7) : key.slice(0, 3),
+    hasOrgId: !!(env.OPENAI_ORG_ID && String(env.OPENAI_ORG_ID).trim()),
+    hasProjectIdSecret: !!(env.OPENAI_PROJECT_ID && String(env.OPENAI_PROJECT_ID).trim()),
+    projectHeaderSent: shouldSendOpenAIProjectHeader(env, key),
+    skProjKey: key.startsWith("sk-proj-"),
+  };
 }
 
 function openAiHeaders(env) {
@@ -507,6 +535,7 @@ export default {
           firstPreview: (firstErrorText || "").slice(0, 400),
           lastPreview: (errText || "").slice(0, 400),
           lastResponse: lastMeta,
+          envHints: openAiEnvHints(env),
           probe,
         },
         openai:

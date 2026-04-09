@@ -14,7 +14,9 @@ npx wrangler login
 npx wrangler secret put OPENAI_API_KEY
 ```
 
-If the key is **project-scoped**, also run `npx wrangler secret put OPENAI_PROJECT_ID` and (if required) `OPENAI_ORG_ID` with the ids from [platform.openai.com](https://platform.openai.com). Missing project headers often produce HTTP 400 with an empty response body on `POST /chat/completions`.
+- **If your key starts with `sk-proj-`**, it is already tied to one project. **Do not** set `OPENAI_PROJECT_ID` unless you also need a different project — a mismatched `OpenAI-Project` header can cause empty HTTP 400 responses. The Worker **skips** `OpenAI-Project` for `sk-proj-` keys by default.
+- **If your key starts with `sk-` (not `sk-proj-`)** and the dashboard requires a project, set `OPENAI_PROJECT_ID` (and `OPENAI_ORG_ID` if required).
+- To **force** sending `OpenAI-Project` even for `sk-proj-` keys, set Worker var `OPENAI_FORCE_PROJECT_HEADER` = `1`.
 
 ## 2) Deploy
 
