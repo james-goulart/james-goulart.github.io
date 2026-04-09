@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 require("dotenv").config({
   path: path.join(__dirname, ".env"),
@@ -10,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: "512kb" }));
+/* Site root is public/; run `npm run sync:assets` (or npm start) so `public/assets` mirrors ./assets. */
 app.use(express.static(path.join(__dirname, "public")));
 
 /* Simple in-memory rate limiter: max 20 requests per IP per minute */
@@ -45,4 +47,9 @@ app.post("/api/chat", rateLimiter, chatHandler);
 
 app.listen(PORT, () => {
   console.log(`Portfolio running at http://localhost:${PORT}`);
+  if (!fs.existsSync(path.join(__dirname, "public", "assets"))) {
+    console.warn(
+      "public/assets/ is missing — images will 404. Run: npm run sync:assets"
+    );
+  }
 });

@@ -4,10 +4,11 @@
   "private": true,
   "description": "James Goulart — conversational portfolio with JamesCVBot",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "node scripts/sync-assets.js && node server.js",
+    "dev": "node scripts/sync-assets.js && node server.js",
     "worker:dev": "wrangler dev",
-    "worker:deploy": "wrangler deploy"
+    "sync:assets": "node scripts/sync-assets.js",
+    "worker:deploy": "node scripts/sync-assets.js && wrangler deploy"
   },
   "dependencies": {
     "dotenv": "^17.4.0",

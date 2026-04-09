@@ -1,11 +1,94 @@
-(function () {
-  const DATA = window.PORTFOLIO_DATA;
-  if (!DATA) {
-    console.error("Missing PORTFOLIO_DATA — load data.js first.");
-    return;
+/** Portfolio data and rendering utilities */
+const Portfolio = (function () {
+  "use strict";
+
+  const DATA = window.PORTFOLIO_DATA || { experiences: [], social: [] };
+
+  const TYPE_ORDER = [
+    "executive-summary",
+    "cv",
+    "recruiter-brief",
+    "cover-letter",
+  ];
+  const TYPE_LABEL = {
+    "executive-summary": "Executive summary",
+    cv: "CV",
+    "recruiter-brief": "Recruiter brief",
+    "cover-letter": "Cover letter",
+  };
+
+  /** @param {string} str */
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
-  /** Optional — set your public profile URLs (shown as icon buttons in the header). */
+  /** @param {string} role */
+  function splitExperienceRole(role) {
+    const dashIndex = role.indexOf(" - ");
+    if (dashIndex === -1) return { main: role, subtitle: "" };
+    return {
+      main: role.slice(0, dashIndex).trim(),
+      subtitle: role.slice(dashIndex + 3).trim(),
+    };
+  }
+
+  /**
+   * Build HTML for an experience role with optional subtitle handling.
+   * @param {{role?: string}} exp
+   * @param {string} textClass - class for the role text span
+   * @returns {string} HTML string
+   */
+  function roleHtmlWithSubtitle(exp, textClass) {
+    const r = escapeHtml(exp.role || "Role");
+    const parts = splitExperienceRole(r);
+    if (!parts.subtitle) {
+      return '<span class="' + textClass + '">' + parts.main + "</span>";
+    }
+    // Handle special case for vertical alignment in cards
+    const subtitleHtml =
+      '<span class="role-subtitle">' + parts.subtitle + "</span>";
+    return (
+      '<span class="' +
+      textClass +
+      '">' +
+      parts.main +
+      "</span><br>" +
+      subtitleHtml
+    );
+  }
+
+  /** @param {{type?: string, url?: string, name?: string}[]} downloads */
+  function downloadsListHtml(downloads) {
+    if (!downloads || !downloads.length) return "";
+    const items = downloads
+      .slice()
+      .sort(
+        (a, b) =>
+          TYPE_ORDER.indexOf(a.type || "") - TYPE_ORDER.indexOf(b.type || "")
+      )
+      .map(function (d) {
+        const label = TYPE_LABEL[d.type] || d.type || "Document";
+        const url = d.url ? " href=\"" + escapeHtml(String(d.url)) + "\"" : "";
+        const target = d.url ? ' target="_blank" rel="noopener noreferrer"' : "";
+        return (
+          "<li><a" +
+          url +
+          target +
+          ">" +
+          escapeHtml(label) +
+          "</a> — " +
+          escapeHtml(d.name || "") +
+          "</li>"
+        );
+      })
+      .join("");
+    return "<ul>" + items + "</ul>";
+  }
+
   const SOCIAL_LINKS = [
     {
       href: "https://www.linkedin.com/in/jamesgoulart/",
@@ -19,112 +102,11 @@
     },
   ];
 
-  /** When an experience has no cases in the sheet, link to this case id (cross-role). */
-  const RELATED_CASE_FALLBACK = {};
-
-  /** Cases nav: category → case ids (a case may appear in multiple categories). */
-  const CASE_NAV_ORDER = ["AI", "Search", "Real Estate", "Fintech", "UX", "All"];
-  const CASE_IDS_BY_GROUP = {
-    AI: [
-      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
-    ],
-    Search: [
-      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
-      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
-    ],
-    "Real Estate": [
-      "quintoandar-product-manager-rental-liquidity-smartpricing",
-      "quintoandar-product-manager-rental-liquidity-irent",
-      "quintoandar-product-manager-rental-liquidity-no-adm",
-      "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons",
-      "quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth",
-      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
-      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
-    ],
-    Fintech: [
-      "nexoos-product-owner-inverted-loan-request-ux",
-      "nexoos-head-of-product-data-investor-wallet",
-      "nexoos-head-of-product-data-funding-channel-sorting-hat",
-      "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons",
-    ],
-    UX: [
-      "nexoos-product-owner-inverted-loan-request-ux",
-      "nexoos-head-of-product-data-investor-wallet",
-      "quintoandar-product-manager-rental-liquidity-smartpricing",
-      "quintoandar-product-manager-rental-liquidity-no-adm",
-    ],
-  };
-
-  const ORG_ABOUT = {
-    QuintoAndar:
-      "QuintoAndar is Latam's leading proptech, combining marketplace technology, financing, and brokerage operations to simplify renting and buying homes at scale.",
-    Nexoos:
-      "Nexoos was a Brazilian lending fintech connecting SMEs to capital, evolving from a peer-to-peer marketplace into a multi-channel credit platform with institutional funding.",
-    AIESEC:
-      "AIESEC is a global, UN-backed youth organization focused on leadership development through cross-cultural exchange and volunteer experiences.",
-    Unicamp:
-      "Unicamp is one of Brazil's top public research universities, known for strong engineering, science, and innovation programs."
-  };
-
-  function escapeHtml(s) {
-    if (s == null) return "";
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  function findCaseById(caseId) {
-    for (const exp of DATA.experiences) {
-      const c = exp.cases.find(function (x) {
-        return x.id === caseId;
-      });
-      if (c) return { experience: exp, caseItem: c };
-    }
-    return null;
-  }
-
-  /** Most recent experience first; cases listed in sheet order within each role. */
-  function getAllCases() {
-    const list = [];
-    for (let i = DATA.experiences.length - 1; i >= 0; i--) {
-      const exp = DATA.experiences[i];
-      for (let j = 0; j < exp.cases.length; j++) {
-        list.push({ experience: exp, caseItem: exp.cases[j] });
-      }
-    }
-    return list;
-  }
-
-  function tenureLabel(t) {
-    if (t == null || t === "") return "";
-    const n = parseFloat(t, 10);
-    if (isNaN(n)) return escapeHtml(t);
-    const y = n === 1 ? "year" : "years";
-    return escapeHtml(String(n)) + " " + y;
-  }
+  const CV_HREF =
+    "https://drive.google.com/file/d/16QbQk8KQL5xrE3bTa-pk7iuZinO51s0F/view?usp=sharing";
 
   function brandName() {
     return escapeHtml(String(DATA.name || "").toLowerCase()) + ".";
-  }
-
-  function firstNameLower() {
-    const parts = String(DATA.name || "").trim().split(/\s+/);
-    return escapeHtml((parts[0] || DATA.name || "").toLowerCase());
-  }
-
-  function nameInitials() {
-    const parts = String(DATA.name || "")
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
-    if (parts.length >= 2) {
-      return escapeHtml(
-        (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      );
-    }
-    return escapeHtml((parts[0] || "?").slice(0, 2).toUpperCase());
   }
 
   function socialNavHtml() {
@@ -141,9 +123,6 @@
     }).join("");
   }
 
-  const CV_HREF =
-    "https://drive.google.com/file/d/16QbQk8KQL5xrE3bTa-pk7iuZinO51s0F/view?usp=sharing";
-
   /** Experience nav — subtitle under company name. */
   const COMPANY_NAV_TAGLINE = {
     QuintoAndar: "Latam's Biggest Proptech ($5B)",
@@ -152,10 +131,6 @@
     Unicamp: "State University of Campinas",
   };
 
-  /**
-   * Twemoji PNG filenames (72×72) — Windows often shows Unicode flag sequences as
-   * plain letters (PT, BR) instead of glyphs; images render the same everywhere.
-   */
   const FLAG_TWEMOJI_FILE = {
     BR: "1f1e7-1f1f7",
     PT: "1f1f5-1f1f9",
@@ -188,94 +163,6 @@
       escapeHtml(src) +
       '" alt="" width="18" height="18" loading="lazy" decoding="async" />'
     );
-  }
-
-  function locationFlagHtml(exp) {
-    var code = exp.locationFlag || exp.navFlag;
-    if (!code || !FLAG_TWEMOJI_FILE[code]) return "";
-    var src = TWEMOJI_FLAG_BASE + FLAG_TWEMOJI_FILE[code] + ".png";
-    return (
-      '<img class="location-flag-img" src="' +
-      escapeHtml(src) +
-      '" alt="" width="16" height="16" loading="lazy" decoding="async" />'
-    );
-  }
-
-  function locationLineHtml(exp) {
-    if (!exp.location) return "";
-    return (
-      '<span class="page-head__location">' +
-      locationFlagHtml(exp) +
-      escapeHtml(exp.location) +
-      "</span>"
-    );
-  }
-
-  function renderOrgScope(orgScope) {
-    if (!orgScope || !String(orgScope).trim()) return "";
-    var lines = String(orgScope).split("\n").filter(function (l) { return l.trim(); });
-    var items = lines.map(function (line) {
-      var trimmed = line.trim();
-      var isDirect = /\(R\)/i.test(trimmed);
-      var cls = isDirect ? "org-line org-line--direct" : "org-line";
-      return (
-        '<li class="' + cls + '">' +
-        escapeHtml(trimmed) +
-        "</li>"
-      );
-    });
-    return '<ul class="org-scope-list">' + items.join("") + "</ul>";
-  }
-
-  function renderHighlights(highlights) {
-    if (!Array.isArray(highlights) || highlights.length === 0) return "";
-    var items = highlights
-      .map(function (item) { return String(item || "").trim(); })
-      .filter(Boolean)
-      .map(function (item) {
-        return "<li>" + escapeHtml(item) + "</li>";
-      });
-    if (!items.length) return "";
-    return '<ul class="highlights-list">' + items.join("") + "</ul>";
-  }
-
-  function orgAboutText(exp) {
-    return ORG_ABOUT[exp.company] || "";
-  }
-
-  function splitExperienceRole(exp) {
-    if (exp && exp.id === "nexoos-product-owner") {
-      return { main: "Product, Data & Operations", sub: "3rd Employee" };
-    }
-    var role = String((exp && exp.role) || "").trim();
-    var idx = role.indexOf(" - ");
-    if (idx === -1) return { main: role, sub: "" };
-    return {
-      main: role.slice(0, idx).trim(),
-      sub: role.slice(idx + 3).trim()
-    };
-  }
-
-  function roleHtmlWithSubtitle(exp, wrapperClass) {
-    var parts = splitExperienceRole(exp);
-    var cls = wrapperClass ? ' class="' + wrapperClass + '"' : "";
-    var sub = "";
-    if (parts.sub) {
-      sub = '<br /><em class="role-subtitle">' + escapeHtml(parts.sub) + "</em>";
-    } else if (exp && exp.id === "nexoos-head-of-product-data") {
-      sub = '<br /><span class="role-subtitle role-subtitle--placeholder" aria-hidden="true">&nbsp;</span>';
-    }
-    return "<span" + cls + ">" + escapeHtml(parts.main) + sub + "</span>";
-  }
-
-  function renderCardBullets(lines) {
-    if (!Array.isArray(lines) || lines.length === 0) return "";
-    var items = lines
-      .map(function (item) { return String(item || "").trim(); })
-      .filter(Boolean)
-      .map(function (item) { return "<li>" + escapeHtml(item) + "</li>"; });
-    if (!items.length) return "";
-    return '<ul class="card-bullets">' + items.join("") + "</ul>";
   }
 
   /** 2nd-level experience links: flag + role (+ optional subtitle line). */
@@ -322,7 +209,7 @@
     );
   }
 
-  /** Role: bold segment before first " - " (e.g. "Product Manager" in "Product Manager - Rental …"). */
+  /** Role: bold segment before first " - " */
   function roleNavHtml(role) {
     var s = String(role);
     var idx = s.indexOf(" - ");
@@ -350,6 +237,19 @@
       "</strong>" +
       escapeHtml(s.slice(idx))
     );
+  }
+
+  /** Most recent experience first; cases in sheet order within each role. */
+  function getAllCases() {
+    const list = [];
+    for (let i = DATA.experiences.length - 1; i >= 0; i--) {
+      const exp = DATA.experiences[i];
+      if (!exp.cases) continue;
+      for (let j = 0; j < exp.cases.length; j++) {
+        list.push({ experience: exp, caseItem: exp.cases[j] });
+      }
+    }
+    return list;
   }
 
   function experiencesByCompany() {
@@ -405,58 +305,57 @@
       "</a></li>";
     return (
       g.companies
-      .map(function (company) {
-        const rows = g.map[company]
-          .map(function (x) {
-            const e = x.exp;
-            const cls =
-              active === "exp-" + e.id ? ' class="is-active"' : "";
-            return (
-              '<li><a href="experience.html#' +
-              encodeURIComponent(e.id) +
-              '"' +
-              cls +
-              ">" +
-              experienceRoleNavInnerHtml(e) +
-              "</a></li>"
-            );
-          })
-          .join("");
-        const icon = companyNavIconHtml(company);
-        const tag = companyNavTagline(company);
-        var titleBlock =
-          '<span class="nav-exp-company__title">' +
-          escapeHtml(company) +
-          "</span>";
-        const labelInner =
-          titleBlock +
-          (tag
-            ? '<span class="nav-exp-company__tagline">' +
-              escapeHtml(tag) +
-              "</span>"
-            : "");
-        return (
-          '<li class="nav-exp-company">' +
-          '<span class="nav-exp-company__name nav-nav-line">' +
-          '<span class="nav-exp-company__icon-cell">' +
-          icon +
-          "</span>" +
-          '<span class="nav-exp-company__label">' +
-          labelInner +
-          "</span>" +
-          '<span class="nav-exp-arrow-inline" aria-hidden="true">\u2192</span>' +
-          "</span>" +
-          '<ul class="nav-exp-roles">' +
-          rows +
-          "</ul></li>"
-        );
-      })
-      .join("") +
+        .map(function (company) {
+          const rows = g.map[company]
+            .map(function (x) {
+              const e = x.exp;
+              const cls =
+                active === "exp-" + e.id ? ' class="is-active"' : "";
+              return (
+                "<li><a href=\"experience.html#" +
+                encodeURIComponent(e.id) +
+                '"' +
+                cls +
+                ">" +
+                experienceRoleNavInnerHtml(e) +
+                "</a></li>"
+              );
+            })
+            .join("");
+          const icon = companyNavIconHtml(company);
+          const tag = companyNavTagline(company);
+          var titleBlock =
+            '<span class="nav-exp-company__title">' +
+            escapeHtml(company) +
+            "</span>";
+          const labelInner =
+            titleBlock +
+            (tag
+              ? '<span class="nav-exp-company__tagline">' +
+                escapeHtml(tag) +
+                "</span>"
+              : "");
+          return (
+            '<li class="nav-exp-company">' +
+            '<span class="nav-exp-company__name nav-nav-line">' +
+            '<span class="nav-exp-company__icon-cell">' +
+            icon +
+            "</span>" +
+            '<span class="nav-exp-company__label">' +
+            labelInner +
+            "</span>" +
+            '<span class="nav-exp-arrow-inline" aria-hidden="true">\u2192</span>' +
+            "</span>" +
+            '<ul class="nav-exp-roles">' +
+            rows +
+            "</ul></li>"
+          );
+        })
+        .join("") +
       allExperiencesRow
     );
   }
 
-  /** Icons for case category dropdown (AI, Search, Real Estate, Fintech, UX, All). */
   function navCaseCategoryIconSvg(label) {
     var base =
       '<svg class="nav-case-cat__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -531,7 +430,7 @@
         const cls = isCaseActive ? ' class="is-active"' : "";
         const ico = companyNavIconHtml(x.experience.company);
         parts.push(
-          '<li><a href="case.html#' +
+          "<li><a href=\"case.html#" +
           encodeURIComponent(id) +
           '"' +
           cls +
@@ -548,11 +447,23 @@
     return CASE_NAV_ORDER.map(function (label) {
       var ids;
       if (label === "All") {
-        ids = allCases.map(function (x) {
-          return x.caseItem.id;
+        var seenAll = Object.create(null);
+        ids = [];
+        CASE_DISPLAY_ORDER.forEach(function (id) {
+          if (byId[id]) {
+            ids.push(id);
+            seenAll[id] = true;
+          }
+        });
+        allCases.forEach(function (x) {
+          var cid = x.caseItem.id;
+          if (!seenAll[cid]) {
+            seenAll[cid] = true;
+            ids.push(cid);
+          }
         });
       } else {
-        ids = CASE_IDS_BY_GROUP[label] || [];
+        ids = sortIdsByDisplayOrder(CASE_IDS_BY_GROUP[label] || []);
       }
       const rows = linksForIds(ids);
       if (!rows) return "";
@@ -579,64 +490,138 @@
     }).join("");
   }
 
-  /** Navbar, case nav, latest work strip — small mark only. */
-  function companyIconSrc(company) {
-    if (company === "Nexoos") return "./nexoos-OO.webp";
-    if (company === "QuintoAndar") return "./quintoandar-blue.svg";
-    if (company === "AIESEC") return "./AIESEC-Human-Blue.jpg";
-    if (company === "Unicamp") return "./unicamp-icon.png";
-    return "";
-  }
+  function injectNav(container, active) {
+    if (!container) return;
+    active = active || "home";
+    const expMenu = buildExperiencesNavHtml(active);
+    const casesMenu = buildCasesNavHtml(active);
+    const casesParentActive =
+      active === "cases" ||
+      (typeof active === "string" && active.indexOf("case-") === 0);
+    const expSectionActive =
+      active === "experiences" ||
+      (typeof active === "string" && active.indexOf("exp-") === 0);
 
-  /** “Where I’ve worked” cards + case page subtitle — full wordmark where available. */
-  function companyWordmarkSrc(company) {
-    if (company === "Nexoos") return "./Logo-Nexoos-1024x182.webp";
-    if (company === "QuintoAndar") return "./quintoandar-logo.svg";
-    if (company === "AIESEC") return "./aiesec-logo-full.png";
-    if (company === "Unicamp") return "./UNICAMP_logo.png";
-    return "";
-  }
+    container.innerHTML =
+      '<div class="nav-inner">' +
+      '<a class="nav-brand" href="index.html">' +
+      brandName() +
+      "</a>" +
+      '<div class="nav-center-wrap">' +
+      '<ul id="nav-menu" class="nav-menu">' +
+      '<li><a href="index.html"' +
+      (active === "home" ? ' class="is-active"' : "") +
+      ">copilot</a></li>" +
+      '<li class="nav-has-sub nav-has-sub--exp">' +
+      '<a href="experience.html" class="nav-label' +
+      (expSectionActive ? " nav-label--active" : "") +
+      '">experiences</a>' +
+      '<ul class="nav-sub nav-sub--exp">' +
+      expMenu +
+      "</ul></li>" +
+      '<li class="nav-has-sub nav-has-sub--cases">' +
+      '<a href="cases.html"' +
+      (casesParentActive ? ' class="is-active"' : "") +
+      ">cases</a>" +
+      '<ul class="nav-sub nav-sub--cases nav-sub--cases-grouped">' +
+      casesMenu +
+      "</ul></li>" +
+      '<li><a href="news.html"' +
+      (active === "news" ? ' class="is-active"' : "") +
+      ">news</a></li>" +
+      '<li><a class="nav-cv" href="' +
+      CV_HREF +
+      '" target="_blank" rel="noopener noreferrer">download cv</a></li>' +
+      "</ul></div>" +
+      '<div class="nav-actions">' +
+      '<button type="button" class="nav-toggle" aria-expanded="false" aria-controls="nav-menu">Menu</button>' +
+      '<div class="nav-social">' +
+      socialNavHtml() +
+      "</div></div></div>";
 
-  /** Experience cards: full wordmark for all companies. */
-  function companyCardLogoSrc(e) {
-    return companyWordmarkSrc(e.company);
-  }
-
-  /** Case page subtitle: logo or icon + role (Nexoos includes “3rd employee”). */
-  function casePageRoleLineHtml(exp) {
-    var logoSrc = companyWordmarkSrc(exp.company);
-    var brand = "";
-    if (logoSrc) {
-      brand =
-        '<img class="page-head__co-logo" src="' +
-        escapeHtml(logoSrc) +
-        '" alt="' +
-        escapeHtml(exp.company) +
-        '" />';
-    } else {
-      var iconSrc = companyIconSrc(exp.company);
-      brand = iconSrc
-        ? '<img class="page-head__co-logo page-head__co-logo--icon" src="' +
-          escapeHtml(iconSrc) +
-          '" alt="' +
-          escapeHtml(exp.company) +
-          '" />'
-        : '<span class="page-head__co-fallback">' +
-          escapeHtml(exp.company) +
-          "</span>";
+    const btn = container.querySelector(".nav-toggle");
+    const menu = container.querySelector("#nav-menu");
+    if (btn && menu) {
+      btn.addEventListener("click", function () {
+        const open = menu.classList.toggle("is-open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
     }
-    var roleText =
-      exp.id === "nexoos-product-owner"
-        ? logoSrc
-          ? escapeHtml(exp.role) +
-            '<br /><span class="page-head__employee-note">3rd employee</span>'
-          : "<strong>Nexoos</strong><br />" +
-            escapeHtml(exp.role) +
-            '<br /><span class="page-head__employee-note">3rd employee</span>'
-        : escapeHtml(exp.role);
+  }
+
+  function formatNarrative(text) {
+    const paragraphs = String(text || "")
+      .split(/\n{2,}/)
+      .map(function (p) {
+        return p.trim();
+      })
+      .filter(function (p) {
+        return p.length > 0;
+      });
+    return paragraphs
+      .map(function (p) {
+        const strong = p.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        return "<p>" + em + "</p>";
+      })
+      .join("");
+  }
+
+  function tenureLabel(tenure) {
+    if (tenure == null || tenure === "") return "—";
+    if (typeof tenure === "object") {
+      const start = tenure.start || "";
+      const end = tenure.end || "Present";
+      return start + " — " + end;
+    }
+    var s = String(tenure).trim();
+    if (s === "") return "—";
+    var n = parseFloat(s.replace(",", "."));
+    if (isNaN(n)) return s;
+    if (n < 1) {
+      var months = Math.round(n * 12);
+      if (months <= 0) return "—";
+      return months + (months === 1 ? " month" : " months");
+    }
+    var rounded = Math.round(n * 10) / 10;
+    var yearsStr =
+      rounded % 1 === 0 ? String(Math.round(rounded)) : String(rounded);
+    return yearsStr + (rounded === 1 ? " year" : " years");
+  }
+
+  function locationFlagHtml(exp) {
+    var file = expNavFlagTwemojiFile(exp);
+    if (!file) return "";
+    var src = TWEMOJI_FLAG_BASE + file + ".png";
     return (
-      brand + '<span class="page-head__role-text">' + roleText + "</span>"
+      '<img class="location-flag-img" src="' +
+      escapeHtml(src) +
+      '" alt="" width="16" height="16" loading="lazy" decoding="async" /> '
     );
+  }
+
+  /** @returns {string|null} company wordmark src (match james-goulart.github.io) */
+  function companyWordmarkSrc(company) {
+    if (!company) return null;
+    const map = {
+      Nexoos: "/assets/images/logos/Logo-Nexoos-1024x182.webp",
+      QuintoAndar: "/assets/images/logos/quintoandar-logo.svg",
+      AIESEC: "/assets/images/logos/aiesec-logo-full.png",
+      Unicamp: "/assets/images/logos/UNICAMP_logo.png",
+    };
+    return map[company] || null;
+  }
+
+  /** @returns {string|null} navbar mini mark — same files as production site root */
+  function companyIconSrc(company) {
+    if (!company) return null;
+    const map = {
+      Nexoos: "/assets/images/logos/nexoos-OO.webp",
+      QuintoAndar: "/assets/images/logos/quintoandar-blue.svg",
+      AIESEC: "/assets/images/logos/AIESEC-Human-Blue.jpg",
+      Unicamp: "/assets/images/logos/unicamp-icon.png",
+    };
+    return map[company] || null;
   }
 
   function companyNavIconHtml(company) {
@@ -649,27 +634,60 @@
     );
   }
 
-  function workCardIconHtml(company) {
-    const src = companyIconSrc(company);
-    if (!src) return "";
-    return (
-      '<img class="work-card__co-icon" src="' +
-      escapeHtml(src) +
-      '" alt="" width="22" height="22" loading="lazy" />'
-    );
+  /** @returns {string|null} card logo src for experiences */
+  function companyCardLogoSrc(exp) {
+    // Use wordmark if available
+    const wm = companyWordmarkSrc(exp.company);
+    if (wm) return wm;
+    // Fallback to icon with larger presentation
+    return companyIconSrc(exp.company);
   }
 
-  function stripDuplicateHeadline(narrative, headline) {
-    if (!narrative || !String(narrative).trim()) return narrative;
-    const h = String(headline).trim();
-    const lines = String(narrative).replace(/\r\n/g, "\n").split("\n");
-    const first = lines.length ? lines[0].trim() : "";
-    if (first === h) {
-      var i = 1;
-      while (i < lines.length && lines[i].trim() === "") i++;
-      return lines.slice(i).join("\n");
-    }
-    return narrative;
+  function caseIdByTitleFallback(title) {
+    // naive kebab-case mapping for case ids
+    const slug = String(title || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return "case--" + slug;
+  }
+
+  /** @param {string} orgScope multiline string */
+  function renderOrgScope(orgScope) {
+    const lines = String(orgScope || "")
+      .trim()
+      .split(/\n/)
+      .filter(function (line) {
+        return line.trim().length > 0;
+      });
+    if (!lines.length) return "";
+    return "<ul>" + lines.map(function (line) {
+      return "<li>" + escapeHtml(line.trim()) + "</li>";
+    }).join("") + "</ul>";
+  }
+
+  /** @param {string[]} highlights */
+  function renderHighlights(highlights) {
+    if (!highlights || !highlights.length) return "";
+    return "<ul>" + highlights.map(function (h) {
+      return "<li>" + escapeHtml(h) + "</li>";
+    }).join("") + "</ul>";
+  }
+
+  /** @param {string[]} lines */
+  function renderCardBullets(lines) {
+    if (!lines || !lines.length) return "";
+    return "<ul class=\"card-bullets\">" +
+      lines.map(function (line) {
+        return "<li>" + escapeHtml(line) + "</li>";
+      }).join("") +
+      "</ul>";
+  }
+
+  function orgAboutText(exp) {
+    const about = window.ORG_ABOUT || {};
+    if (exp.track === "Degree" && about["Unicamp"]) return about["Unicamp"];
+    return about[exp.company] || "";
   }
 
   function linkHostname(url) {
@@ -710,7 +728,7 @@
     return s.slice(0, half) + "\u2026" + s.slice(-half);
   }
 
-  /** Curated English headlines for related-news cards (fills when fetch fails). */
+  /** Curated English headlines (fills when fetch fails). Merged with window.RELATED_NEWS_TITLES. */
   const RELATED_NEWS_TITLE_EN = {
     "https://www.infomoney.com.br/minhas-financas/plataforma-de-p2p-nexoos-lanca-conta-digital-para-investidores/":
       "Nexoos P2P platform launches digital account for investors",
@@ -743,6 +761,8 @@
   };
 
   function relatedNewsTitleEn(url) {
+    var w = window.RELATED_NEWS_TITLES || {};
+    if (w[url]) return w[url];
     var u = String(url).trim();
     if (RELATED_NEWS_TITLE_EN[u]) return RELATED_NEWS_TITLE_EN[u];
     var nos = u.replace(/\/$/, "");
@@ -800,7 +820,7 @@
   }
 
   function newsSiteThumbSrc(host) {
-    if (isExameNewsHost(host)) return "./exame-logo-0.png";
+    if (isExameNewsHost(host)) return "/assets/images/exame-logo-0.png";
     if (!host) return "";
     return (
       "https://www.google.com/s2/favicons?sz=128&domain=" +
@@ -838,31 +858,41 @@
           : "") +
         "</div>";
     }
-    
+
     var relatedHtml = "";
     if (relatedCase && typeof relatedCase === "object") {
-      relatedHtml = 
+      relatedHtml =
         '<div class="news-card__related">' +
         '<span class="news-card__related-label">Related case</span>' +
-        '<a href="case.html#' + encodeURIComponent(relatedCase.id) + '" class="news-card__related-title">' + escapeHtml(relatedCase.name) + '</a>' +
-        '</div>';
+        '<a href="case.html#' +
+        encodeURIComponent(relatedCase.id) +
+        '" class="news-card__related-title">' +
+        escapeHtml(relatedCase.name) +
+        "</a>" +
+        "</div>";
     }
 
     return (
       '<div class="news-card" data-news-url="' +
       escapeHtml(u) +
       '">' +
-      '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer" class="news-card__thumb-link">' +
+      '<a href="' +
+      escapeHtml(u) +
+      '" target="_blank" rel="noopener noreferrer" class="news-card__thumb-link">' +
       thumbInner +
-      '</a>' +
+      "</a>" +
       '<div class="news-card__body">' +
       '<span class="news-card__host">' +
       escapeHtml(host || "Link") +
       "</span>" +
-      '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer" class="news-card__title news-card__title--primary">' +
+      '<a href="' +
+      escapeHtml(u) +
+      '" target="_blank" rel="noopener noreferrer" class="news-card__title news-card__title--primary">' +
       escapeHtml(presetEn || truncateUrlDisplay(u, 72)) +
       "</a>" +
-      '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer" class="news-card__action">' +
+      '<a href="' +
+      escapeHtml(u) +
+      '" target="_blank" rel="noopener noreferrer" class="news-card__action">' +
       (ytId ? "Watch on YouTube" : "Open link") +
       " \u2192</a>" +
       relatedHtml +
@@ -940,67 +970,93 @@
     });
   }
 
-  function injectNav(container, active) {
-    if (!container) return;
-    active = active || "home";
-    const expMenu = buildExperiencesNavHtml(active);
-    const casesMenu = buildCasesNavHtml(active);
-    const casesParentActive =
-      active === "cases" ||
-      (typeof active === "string" && active.indexOf("case-") === 0);
-    const expSectionActive =
-      active === "experiences" ||
-      (typeof active === "string" && active.indexOf("exp-") === 0);
+  /** When an experience has no cases in the sheet, link to this case id (cross-role). */
+  const RELATED_CASE_FALLBACK = {};
 
-    container.innerHTML =
-      '<div class="nav-inner">' +
-      '<a class="nav-brand" href="index.html">' +
-      brandName() +
-      "</a>" +
-      '<div class="nav-center-wrap">' +
-      '<ul id="nav-menu" class="nav-menu">' +
-      '<li><a href="index.html"' +
-      (active === "home" ? ' class="is-active"' : "") +
-      ">copilot</a></li>" +
-      '<li class="nav-has-sub nav-has-sub--exp">' +
-      '<a href="experience.html" class="nav-label' +
-      (expSectionActive ? " nav-label--active" : "") +
-      '">experiences</a>' +
-      '<ul class="nav-sub nav-sub--exp">' +
-      expMenu +
-      "</ul></li>" +
-      '<li class="nav-has-sub nav-has-sub--cases">' +
-      '<a href="cases.html"' +
-      (casesParentActive ? ' class="is-active"' : "") +
-      ">cases</a>" +
-      '<ul class="nav-sub nav-sub--cases nav-sub--cases-grouped">' +
-      casesMenu +
-      "</ul></li>" +
-      '<li><a href="news.html"' +
-      (active === "news" ? ' class="is-active"' : "") +
-      ">news</a></li>" +
-      '<li><a class="nav-cv" href="' +
-      CV_HREF +
-      '" target="_blank" rel="noopener noreferrer">download cv</a></li>' +
-      "</ul></div>" +
-      '<div class="nav-actions">' +
-      '<button type="button" class="nav-toggle" aria-expanded="false" aria-controls="nav-menu">Menu</button>' +
-      '<div class="nav-social">' +
-      socialNavHtml() +
-      "</div></div></div>";
+  /** Cases nav: category → case ids (a case may appear in multiple categories). */
+  const CASE_NAV_ORDER = ["AI", "Search", "Real Estate", "Fintech", "UX", "All"];
+  const CASE_IDS_BY_GROUP = {
+    AI: [
+      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
+    ],
+    Search: [
+      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
+      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
+    ],
+    "Real Estate": [
+      "quintoandar-product-manager-rental-liquidity-smartpricing",
+      "quintoandar-product-manager-rental-liquidity-irent",
+      "quintoandar-product-manager-rental-liquidity-no-adm",
+      "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons",
+      "quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth",
+      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
+      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
+    ],
+    Fintech: [
+      "nexoos-product-owner-inverted-loan-request-ux",
+      "nexoos-product-owner-inverted-credit-bureau-proxy-from-risk-to-growth",
+    ],
+    UX: [
+      "nexoos-product-owner-inverted-loan-request-ux",
+      "quintoandar-product-manager-rental-liquidity-irent",
+    ],
+  };
 
-    const btn = container.querySelector(".nav-toggle");
-    const menu = container.querySelector("#nav-menu");
-    if (btn && menu) {
-      btn.addEventListener("click", function () {
-        const open = menu.classList.toggle("is-open");
-        btn.setAttribute("aria-expanded", open ? "true" : "false");
-      });
+  /**
+   * Single canonical order: conversation → search quality → forsale → … → loan → credit bureau.
+   * Used for /cases, cases nav, and category sublists (by this order within each filter).
+   */
+  const CASE_DISPLAY_ORDER = [
+    "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
+    "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
+    "quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth",
+    "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons",
+    "quintoandar-product-manager-rental-liquidity-no-adm",
+    "quintoandar-product-manager-rental-liquidity-irent",
+    "quintoandar-product-manager-rental-liquidity-smartpricing",
+    "nexoos-head-of-product-data-funding-channel-sorting-hat",
+    "nexoos-head-of-product-data-investor-wallet",
+    "nexoos-product-owner-inverted-loan-request-ux",
+    "nexoos-product-owner-inverted-credit-bureau-proxy-from-risk-to-growth",
+  ];
+
+  function sortIdsByDisplayOrder(idList) {
+    var idx = {};
+    CASE_DISPLAY_ORDER.forEach(function (id, i) {
+      idx[id] = i;
+    });
+    return idList.slice().sort(function (a, b) {
+      return (idx[a] ?? 9999) - (idx[b] ?? 9999);
+    });
+  }
+
+  function sortCasesLikeNav(items) {
+    if (!items || items.length < 2) return;
+    var idx = {};
+    CASE_DISPLAY_ORDER.forEach(function (id, i) {
+      idx[id] = i;
+    });
+    items.sort(function (a, b) {
+      return (idx[a.caseItem.id] ?? 9999) - (idx[b.caseItem.id] ?? 9999);
+    });
+  }
+
+  function caseIndexFromId(caseId) {
+    if (!DATA.experiences) return -1;
+    for (let i = 0; i < DATA.experiences.length; i++) {
+      const exp = DATA.experiences[i];
+      if (!exp.cases) continue;
+      for (let j = 0; j < exp.cases.length; j++) {
+        if (exp.cases[j].id === caseId) {
+          return { expIndex: i, caseIndex: j, experience: exp, caseItem: exp.cases[j] };
+        }
+      }
     }
+    return null;
   }
 
   function setHomePageMode(main, isHome) {
-    if (!main || !main.classList) return;
+    if (!main) return;
     if (isHome) {
       main.classList.add("page--chat-home");
     } else {
@@ -1055,7 +1111,7 @@
 
     const casesHtml = exp.cases
       .map(function (c) {
-        const narr = stripDuplicateHeadline(c.narrative, c.name);
+        const narr = c.narrative || "";
         const body =
           narr && narr.trim()
             ? '<div class="narrative">' + formatNarrative(narr) + "</div>"
@@ -1141,193 +1197,117 @@
       '</div>';
   }
 
-  function formatNarrative(text) {
-    var escaped = escapeHtml(text);
-    var blocks = escaped.split(/\n\n+/);
-    return blocks.map(function (block) {
-      block = block.trim();
-      if (!block) return "";
-      var lines = block.split("\n");
-      var isNumberedList = lines.length > 1 && lines.every(function (l) {
-        return /^\d+\.\s/.test(l.trim()) || !l.trim();
-      });
-      if (isNumberedList) {
-        var items = lines.filter(function (l) { return l.trim(); }).map(function (l) {
-          return "<li>" + l.trim().replace(/^\d+\.\s*/, "") + "</li>";
-        }).join("");
-        return '<ol class="case-ol">' + items + "</ol>";
-      }
-      return "<p>" + block.replace(/\n/g, "<br />") + "</p>";
-    }).join("");
-  }
-
-  /** Allow only same-site relative links in case narratives. */
-  function isAllowedCaseInternalLink(href) {
-    var h = String(href || "").trim();
-    if (!h || h.length > 400) return false;
-    if (/[\s<>"'`]/.test(h)) return false;
-    if (/^https?:\/\//i.test(h)) return false;
-    if (/^[a-z][a-z0-9+.-]*:/i.test(h)) return false;
-    if (h.indexOf("..") !== -1) return false;
-    if (h.indexOf("//") !== -1) return false;
+  function locationLineHtml(exp) {
+    if (!exp.location) return "";
     return (
-      /^case\.html#[a-zA-Z0-9_-]+$/.test(h) ||
-      /^experience\.html#[a-zA-Z0-9_-]+$/.test(h)
+      '<p class="page-head__location">' +
+      locationFlagHtml(exp) +
+      escapeHtml(exp.location) +
+      "</p>"
     );
-  }
-
-  /**
-   * Like formatNarrative but supports [label](case.html#id) internal links.
-   * Invalid or off-site links are left as plain escaped text.
-   */
-  function formatCaseNarrative(text) {
-    var raw = String(text);
-    var store = [];
-    var idx = 0;
-    var processed = raw.replace(/\[([^\]]*)\]\(([^)]*)\)/g, function (full, label, href) {
-      var h = String(href || "").trim();
-      if (!isAllowedCaseInternalLink(h)) {
-        return full;
-      }
-      var ph = "{{CASELINK_" + idx + "}}";
-      store.push({ label: label, href: h });
-      idx++;
-      return ph;
-    });
-    var html = formatNarrative(processed);
-    for (var j = 0; j < store.length; j++) {
-      var a =
-        '<a class="case-inline-link" href="' +
-        escapeHtml(store[j].href) +
-        '">' +
-        escapeHtml(store[j].label) +
-        "</a>";
-      html = html.split("{{CASELINK_" + j + "}}").join(a);
-    }
-    return html;
-  }
-
-  function renderCaseSection(label, sectionClass, content) {
-    if (!content || !content.trim()) return "";
-    return '<section class="case-section case-section--' + sectionClass + '">' +
-      '<h2 class="case-section__heading">' + escapeHtml(label) + '</h2>' +
-      '<div class="case-section__body">' + formatCaseNarrative(content) + '</div>' +
-      '</section>';
-  }
-
-  function renderMetricPills(metrics) {
-    if (!metrics || !metrics.length) return "";
-    var pills = metrics.map(function (m) {
-      var row = '<div class="metric-pill__values">';
-      if (m.before) {
-        row +=
-          '<span class="metric-pill__before">' +
-          escapeHtml(m.before) +
-          '</span><span class="metric-pill__arrow" aria-hidden="true">\u2192</span>';
-      }
-      row +=
-        '<span class="metric-pill__after">' + escapeHtml(m.after) + "</span></div>";
-      return (
-        '<div class="metric-pill">' +
-        '<span class="metric-pill__label">' +
-        escapeHtml(m.label) +
-        "</span>" +
-        row +
-        "</div>"
-      );
-    }).join("");
-    return '<div class="case-metrics">' + pills + "</div>";
   }
 
   function renderCase(main) {
     setHomePageMode(main, false);
     const id = decodeURIComponent((location.hash || "#").slice(1));
-    const found = findCaseById(id);
+    const found = caseIndexFromId(id);
     if (!found) {
       main.innerHTML =
-        '<p class="empty">Case not found. <a href="cases.html">All cases</a> or <a href="index.html">home</a>.</p>';
+        '<p class="empty">Case not found. <a href="cases.html">All cases</a>.</p>';
       return;
     }
-
-    const c = found.caseItem;
     const exp = found.experience;
-    const rich = window.CASES_CONTENT && window.CASES_CONTENT[c.id];
+    const c = found.caseItem;
 
-    const rawUrls = (c.relatedNews || []).map(function (u) {
-      return String(u).trim();
-    }).filter(Boolean);
+    const wm = companyWordmarkSrc(exp.company);
+    const ic = companyIconSrc(exp.company);
+    const brandRow =
+      wm || ic
+        ? '<p class="page-head__brand">' +
+          (wm
+            ? '<img class="page-head__co-logo" src="' + escapeHtml(wm) + '" alt="" />'
+            : '<img class="page-head__co-logo page-head__co-logo--icon" src="' +
+              escapeHtml(ic) +
+              '" alt="" />') +
+          "</p>"
+        : "";
 
-    const newsAside =
-      rawUrls.length > 0
-        ? '<aside class="case-aside" aria-label="Related news and links">' +
-          "<h2>Related news &amp; links</h2>" +
-          '<ul class="case-related-news-list">' +
-          rawUrls.map(function(u) {
-            var raw = String(u || "").trim();
-            return '<li><a href="' + escapeHtml(raw) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(relatedNewsTitleEn(raw) || raw) + "</a></li>";
+    const relatedNewsHtml =
+      c.relatedNews && c.relatedNews.length
+        ? '<ul class="case-related-news-list">' +
+          c.relatedNews
+            .map(function (u) {
+              return (
+                '<li><a href="' +
+                escapeHtml(u) +
+                '" target="_blank" rel="noopener noreferrer">' +
+                escapeHtml(relatedNewsTitleEn(u) || u) +
+                "</a></li>"
+              );
+            })
+            .join("") +
+          "</ul>"
+        : "";
+
+    const metaBlock =
+      '<p class="page-head__role page-head__role--case">' +
+      '<span class="page-head__role-text">' +
+      escapeHtml(exp.role) +
+      "</span></p>" +
+      (c.tags && c.tags.length
+        ? '<p class="page-head__tags">' +
+          c.tags.map(function (t) {
+            return '<span class="tag">' + escapeHtml(t) + "</span>";
           }).join("") +
-          "</ul></aside>"
-        : "";
+          "</p>"
+        : "") +
+      "<p class=\"facts\"><strong>Related news</strong></p>" +
+      (relatedNewsHtml || "<p class=\"muted\">No related news yet.</p>");
 
-    const roleSubtitle = casePageRoleLineHtml(exp);
-    var bodyHtml = "";
-
-    if (rich) {
-      var tldrBlock = rich.tldr
-        ? '<div class="case-tldr">' + formatCaseNarrative(rich.tldr) + "</div>"
-        : "";
-
-      bodyHtml =
-        tldrBlock +
-        renderMetricPills(rich.metrics) +
-        renderCaseSection("Context", "context", rich.context) +
-        renderCaseSection("Problem", "problem", rich.problem) +
-        renderCaseSection("Insight", "insight", rich.insight) +
-        renderCaseSection("Solution", "solution", rich.solution) +
-        renderCaseSection("Results", "results", rich.results) +
-        renderCaseSection("Reflection", "reflection", rich.reflection);
-    } else {
-      const narr = stripDuplicateHeadline(c.narrative, c.name);
-      bodyHtml =
-        narr && narr.trim()
-          ? '<div class="narrative">' + formatNarrative(narr) + "</div>"
-          : '<p class="muted">Detailed narrative coming soon.</p>';
-    }
+    const narrativeHtml = c.narrative
+      ? '<div class="narrative case-narrative">' + formatNarrative(c.narrative) + "</div>"
+      : '<p class="muted">No narrative yet.</p>';
 
     main.innerHTML =
-      '<header class="page-head">' +
+      '<header class="page-head case-header">' +
+      brandRow +
       "<h1>" +
       escapeHtml(c.name) +
       "</h1>" +
-      '<p class="page-head__role page-head__role--case">' +
-      roleSubtitle +
-      "</p></header>" +
+      metaBlock +
+      "</header>" +
       '<div class="case-layout">' +
       '<div class="case-layout__main">' +
-      bodyHtml +
+      narrativeHtml +
       "</div>" +
-      newsAside +
       "</div>";
-
-    requestAnimationFrame(function () {
-      enhanceNewsCardTitles(main);
-    });
   }
 
   function renderCasesIndex(main) {
     setHomePageMode(main, false);
-    const items = getAllCases();
-    var selected = "All";
+    // Build flat list of cases with parent experience context
+    const all = [];
+    DATA.experiences.forEach(function (exp, expIdx) {
+      if (!exp.cases) return;
+      exp.cases.forEach(function (c, cIdx) {
+        all.push({ expIndex: expIdx, caseIndex: cIdx, experience: exp, caseItem: c });
+      });
+    });
+
+    // Read URL category filter
+    let selected = "All";
     try {
-      var q = new URLSearchParams(window.location.search);
-      selected = q.get("cat") || "All";
+      const url = new URL(window.location.href);
+      selected = url.searchParams.get("cat") || "All";
     } catch (e) {}
-    if (selected !== "All" && !CASE_IDS_BY_GROUP[selected]) selected = "All";
-    const filtered = selected === "All"
-      ? items
-      : items.filter(function (x) {
+
+    let filtered =
+      selected === "All"
+        ? all.slice()
+        : all.filter(function (x) {
           return (CASE_IDS_BY_GROUP[selected] || []).indexOf(x.caseItem.id) !== -1;
         });
+    sortCasesLikeNav(filtered);
     const cards = filtered
       .map(function (x) {
         var companyLogo = companyCardLogoSrc(x.experience);
@@ -1353,10 +1333,9 @@
           '">' +
           escapeHtml(x.caseItem.name) +
           "</a>" +
-          '<span class="card__role card__role--with-icon">' +
-          '<span class="card__role-inline card__role-inline--case">' +
+          '<span class="card__role">' +
           roleHtmlWithSubtitle(x.experience, "card__role-text") +
-          "</span></span>" +
+          "</span>" +
           relatedNewsHtml +
           "</article>"
         );
@@ -1375,7 +1354,7 @@
       "<p>Every case from the portfolio, with narratives and related news links.</p>" +
       "</header>" +
       '<section class="cases-filters cases-filters--tight" aria-label="Filter by"><span class="cases-filters__label">Filter by:</span>' + filterButtons + "</section>" +
-      '<section class="grid-actions" aria-label="Case list">' +
+      '<section class="grid-actions cases-grid" aria-label="Case list">' +
       (cards || '<p class="muted">No cases in this filter yet.</p>') +
       "</section>";
     requestAnimationFrame(function () {
@@ -1505,29 +1484,31 @@
       "<h1>Experiences</h1>" +
       "<p>Professional, volunteering, and academic chapters from James's background.</p>" +
       "</header>" +
-      '<section class="cases-filters cases-filters--tight" aria-label="Filter by"><span class="cases-filters__label">Filter by:</span>' +
-      filterButtons +
-      "</section>" +
-      '<section class="grid-actions" aria-label="Experiences list">' +
-      (cards || '<p class="muted">No experiences in this filter yet.</p>') +
+      '<section class="cases-filters cases-filters--tight" aria-label="Filter experiences"><span class="cases-filters__label">Filter:</span>' + filterButtons + "</section>" +
+      '<section class="grid-actions" aria-label="Experience list">' +
+      (cards || '<p class="muted">No experiences match this filter.</p>') +
       "</section>";
-    main.querySelectorAll(".card-inline-link[data-case-href]").forEach(function (el) {
-      var href = el.getAttribute("data-case-href");
-      if (!href) return;
-      el.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        window.location.href = href;
-      });
-      el.addEventListener("keydown", function (ev) {
-        if (ev.key === "Enter" || ev.key === " ") {
-          ev.preventDefault();
-          ev.stopPropagation();
+
+    // Wire up case inline link clicks
+    main.querySelectorAll('.card-inline-link').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        var href = el.getAttribute('data-case-href');
+        if (href) {
           window.location.href = href;
         }
       });
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          var href = el.getAttribute('data-case-href');
+          if (href) {
+            window.location.href = href;
+          }
+        }
+      });
     });
-    main.querySelectorAll(".case-filter-btn[data-exp-filter]").forEach(function (btn) {
+
+    main.querySelectorAll("[data-exp-filter]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var f = btn.getAttribute("data-exp-filter") || "all";
         try {
@@ -1543,30 +1524,30 @@
   function renderNewsIndex(main) {
     setHomePageMode(main, false);
     const items = getAllCases();
-    let newsItems = [];
-    
+    var newsItems = [];
+
     items.forEach(function (x) {
       if (x.caseItem.relatedNews && x.caseItem.relatedNews.length) {
-        x.caseItem.relatedNews.forEach(function(url) {
+        x.caseItem.relatedNews.forEach(function (url) {
           newsItems.push({
             url: url,
             caseItem: x.caseItem,
-            experience: x.experience
+            experience: x.experience,
           });
         });
       }
     });
 
-    const seenUrls = {};
-    const uniqueNews = [];
-    newsItems.forEach(function(item) {
+    var seenUrls = {};
+    var uniqueNews = [];
+    newsItems.forEach(function (item) {
       if (!seenUrls[item.url]) {
         seenUrls[item.url] = true;
         uniqueNews.push(item);
       }
     });
 
-    const cards = uniqueNews
+    var cards = uniqueNews
       .map(function (item) {
         return newsLinkCardHtml(item.url, item.caseItem);
       })
@@ -1586,13 +1567,13 @@
     });
   }
 
-  window.Portfolio = {
+  return {
     injectNav: injectNav,
     renderHome: renderHome,
     renderExperiencesIndex: renderExperiencesIndex,
     renderExperience: renderExperience,
-    renderCase: renderCase,
     renderCasesIndex: renderCasesIndex,
+    renderCase: renderCase,
     renderNewsIndex: renderNewsIndex,
     DATA: DATA,
     relatedNewsTitleEn: relatedNewsTitleEn,

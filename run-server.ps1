@@ -6,4 +6,6 @@ if (-not (Test-Path $node)) {
     exit 1
 }
 Write-Host "Starting http://localhost:3000 — press Ctrl+C to stop`n" -ForegroundColor Green
+& $node scripts/sync-assets.js
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $node server.js
