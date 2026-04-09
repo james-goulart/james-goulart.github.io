@@ -94,6 +94,13 @@ function openAiBaseUrl(env) {
   );
 }
 
+/** OpenAI keys are ASCII strings starting with sk- (e.g. sk-proj-…). */
+function isValidOpenAIKeyFormat(key) {
+  if (typeof key !== "string" || key.length < 20) return false;
+  if (!key.startsWith("sk-")) return false;
+  return /^sk-[a-zA-Z0-9_-]+$/.test(key);
+}
+
 /**
  * Keys starting with sk-proj- are already scoped to one project; sending
  * OpenAI-Project with a mismatched id can cause empty 400s. Omit unless forced.
@@ -130,8 +137,12 @@ function openAiAuthHeaders(env) {
 /** Safe hints for diagnostics (no secrets). */
 function openAiEnvHints(env) {
   const key = String(env.OPENAI_API_KEY || "").trim();
+  const ok = isValidOpenAIKeyFormat(key);
   return {
-    keyPrefix: key.length >= 7 ? key.slice(0, 7) : key.slice(0, 3),
+    keyFormatOk: ok,
+    keyLength: key.length,
+    keyPrefix: ok ? key.slice(0, 7) : undefined,
+    firstCharCode: key.length ? key.charCodeAt(0) : null,
     hasOrgId: !!(env.OPENAI_ORG_ID && String(env.OPENAI_ORG_ID).trim()),
     hasProjectIdSecret: !!(env.OPENAI_PROJECT_ID && String(env.OPENAI_PROJECT_ID).trim()),
     projectHeaderSent: shouldSendOpenAIProjectHeader(env, key),
@@ -414,11 +425,28 @@ export default {
       );
     }
 
-    if (!env.OPENAI_API_KEY || !String(env.OPENAI_API_KEY).trim()) {
+    const apiKeyTrimmed = String(env.OPENAI_API_KEY || "").trim();
+    if (!apiKeyTrimmed) {
       return jsonResponse(
         {
           error:
             "Missing or empty OPENAI_API_KEY. Set it with: wrangler secret put OPENAI_API_KEY (paste key with no extra spaces or newlines).",
+        },
+        503,
+        request
+      );
+    }
+    if (!isValidOpenAIKeyFormat(apiKeyTrimmed)) {
+      return jsonResponse(
+        {
+          error:
+            'OPENAI_API_KEY in Cloudflare is not a valid OpenAI secret. It must be a plain ASCII string starting with "sk-" (from platform.openai.com → API keys). Delete and recreate: npx wrangler secret delete OPENAI_API_KEY then npx wrangler secret put OPENAI_API_KEY — paste once, no quotes, no hidden characters.',
+          code: "INVALID_API_KEY_FORMAT",
+          diagnostics: {
+            keyLength: apiKeyTrimmed.length,
+            firstCharCode: apiKeyTrimmed.charCodeAt(0),
+            startsWithSk: apiKeyTrimmed.startsWith("sk-"),
+          },
         },
         503,
         request

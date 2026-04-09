@@ -14,6 +14,8 @@ npx wrangler login
 npx wrangler secret put OPENAI_API_KEY
 ```
 
+Paste the key **once** when prompted (no quotes, no spaces before/after). The value must be plain ASCII and start with **`sk-`**. If you see `INVALID_API_KEY_FORMAT` or `firstCharCode` is not `115` (`s`), delete and recreate the secret — the stored value was corrupted (wrong paste, binary, or not the API key).
+
 - **If your key starts with `sk-proj-`**, it is already tied to one project. **Do not** set `OPENAI_PROJECT_ID` unless you also need a different project — a mismatched `OpenAI-Project` header can cause empty HTTP 400 responses. The Worker **skips** `OpenAI-Project` for `sk-proj-` keys by default.
 - **If your key starts with `sk-` (not `sk-proj-`)** and the dashboard requires a project, set `OPENAI_PROJECT_ID` (and `OPENAI_ORG_ID` if required).
 - To **force** sending `OpenAI-Project` even for `sk-proj-` keys, set Worker var `OPENAI_FORCE_PROJECT_HEADER` = `1`.
