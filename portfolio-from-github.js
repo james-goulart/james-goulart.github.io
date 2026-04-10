@@ -76,6 +76,29 @@
       .replace(/"/g, "&quot;");
   }
 
+  function fixUtf8Mojibake(str) {
+    if (!str || typeof str !== "string") return str;
+    return str
+      .replace(/â€™|â€˜/g, "'")
+      .replace(/â€œ/g, "\u201c")
+      .replace(/â€/g, "\u201d")
+      .replace(/â€"|â€"/g, "\u2014")
+      .replace(/â€“/g, "\u2013")
+      .replace(/â€¦/g, "\u2026")
+      .replace(/â€¢/g, "\u2022")
+      .replace(/Ã¡/g, "á")
+      .replace(/Ã©/g, "é")
+      .replace(/Ã­/g, "í")
+      .replace(/Ã³/g, "ó")
+      .replace(/Ãº/g, "ú")
+      .replace(/Ã£/g, "ã")
+      .replace(/Ã§/g, "ç")
+      .replace(/Ãª/g, "ê")
+      .replace(/Ãµ/g, "õ")
+      .replace(/Ã\u00a0/g, "à")
+      .replace(/Ã±/g, "ñ");
+  }
+
   function findCaseById(caseId) {
     for (const exp of DATA.experiences) {
       const c = exp.cases.find(function (x) {
@@ -1015,6 +1038,50 @@
       '<div id="chat-root" class="chat-root chat-root--home"></div>';
   }
 
+  function caseTeaserText(caseItem) {
+    if (caseItem.caseTeaser && String(caseItem.caseTeaser).trim()) {
+      return String(caseItem.caseTeaser).trim();
+    }
+    var n = String(caseItem.narrative || "").trim();
+    if (!n) return "";
+    var dot = n.indexOf(". ");
+    if (dot > 0 && dot < 280) return n.slice(0, dot + 1).trim();
+    if (n.length <= 220) return n;
+    return n.slice(0, 217).trim() + "\u2026";
+  }
+
+  function aggregatedPressBlock(caseRows) {
+    var seen = {};
+    var urls = [];
+    caseRows.forEach(function (row) {
+      (row.caseItem.relatedNews || []).forEach(function (u) {
+        var s = String(u || "").trim();
+        if (!s || seen[s]) return;
+        seen[s] = true;
+        urls.push(s);
+      });
+    });
+    if (!urls.length) return "";
+    var items = urls
+      .map(function (u) {
+        return (
+          '<li><a href="' +
+          escapeHtml(u) +
+          '" target="_blank" rel="noopener noreferrer">' +
+          escapeHtml(relatedNewsTitleEn(u) || u) +
+          "</a></li>"
+        );
+      })
+      .join("");
+    return (
+      '<section class="exp-press" aria-label="Press and media">' +
+      "<h2>Press &amp; media</h2>" +
+      '<ul class="exp-press__list">' +
+      items +
+      "</ul></section>"
+    );
+  }
+
   function renderExperience(main) {
     setHomePageMode(main, false);
     const id = decodeURIComponent((location.hash || "#").slice(1));
@@ -1054,43 +1121,56 @@
           "</div></section>"
         : "";
 
-    const casesHtml = exp.cases
-      .map(function (c) {
-        const narr = stripDuplicateHeadline(c.narrative, c.name);
-        const body =
-          narr && narr.trim()
-            ? '<div class="narrative">' + formatNarrative(narr) + "</div>"
-            : '<p class="muted">Full narrative in the dedicated case page.</p>';
-        const relatedNewsItems =
-          c.relatedNews && c.relatedNews.length
-            ? c.relatedNews.map(function (u) {
-                return (
-                  '<li><a href="' +
-                  escapeHtml(String(u || "").trim()) +
-                  '" target="_blank" rel="noopener noreferrer">' +
-                  escapeHtml(relatedNewsTitleEn(u) || String(u || "").trim()) +
-                  "</a></li>"
-                );
-              }).join("")
-            : "";
-        const relatedNewsBlock = relatedNewsItems
-          ? '<section class="case-card__news"><h3>Related news</h3><ul class="case-card__news-list">' +
-            relatedNewsItems +
-            "</ul></section>"
-          : "";
+    const chapterBlock =
+      exp.chapterSummary && String(exp.chapterSummary).trim()
+        ? '<section class="exp-chapter" aria-label="Role overview">' +
+          '<div class="exp-chapter__body narrative">' +
+          formatNarrative(exp.chapterSummary) +
+          "</div></section>"
+        : "";
+
+    var caseRows = [];
+    (exp.cases || []).forEach(function (c) {
+      caseRows.push({ experience: exp, caseItem: c });
+    });
+
+    const caseTeasersHtml = caseRows
+      .map(function (row) {
+        var c = row.caseItem;
+        var teaser = caseTeaserText(c);
+        var teaserEl = teaser
+          ? '<p class="exp-case-teaser__lede">' + escapeHtml(teaser) + "</p>"
+          : '<p class="muted exp-case-teaser__lede">Full write-up on the case page.</p>';
         return (
-          '<article class="case-block" id="' +
+          '<article class="exp-case-teaser" id="' +
           escapeHtml(c.id) +
           '">' +
-          "<h2>" +
+          '<h3 class="exp-case-teaser__title">' +
+          '<a href="case.html#' +
+          encodeURIComponent(c.id) +
+          '">' +
           escapeHtml(c.name) +
-          "</h2>" +
-          body +
-          relatedNewsBlock +
+          "</a></h3>" +
+          teaserEl +
+          '<a class="exp-case-teaser__cta" href="case.html#' +
+          encodeURIComponent(c.id) +
+          '">Read case study</a>' +
           "</article>"
         );
       })
       .join("");
+
+    const casesSection =
+      caseRows.length
+        ? '<section class="exp-case-studies" aria-label="Case studies">' +
+          "<h2>Case studies</h2>" +
+          '<div class="exp-case-studies__list">' +
+          caseTeasersHtml +
+          "</div></section>"
+        : "";
+
+    const pressBlock =
+      caseRows.length > 0 ? aggregatedPressBlock(caseRows) : "";
 
     // Build sidebar content (similar to case-aside)
     const scopePane = exp.orgScope
@@ -1109,20 +1189,27 @@
       ? '<aside class="exp-aside">' + sidebarContent + '</aside>'
       : "";
 
-    // Build main content with cases styled like case-layout__main
     const academicBlock =
       exp.id === "unicamp-bsc-electrical-engineering"
         ? '<section class="exp-section"><h2>Term paper</h2><p><a href="https://drive.google.com/file/d/12Nh6eFgCoI2W56X9sVIkH80rgE5B-ufb/view?usp=sharing" target="_blank" rel="noopener noreferrer">Read the Unicamp term paper</a></p></section>'
         : "";
 
-    const mainContent = (casesHtml || legacyBlock)
-      ? '<div class="exp-layout__main">' +
-        (casesHtml || legacyBlock) +
-        academicBlock +
-        '</div>'
-      : legacyBlock
-        ? '<div class="exp-layout__main">' + legacyBlock + academicBlock + '</div>'
-        : '<div class="exp-layout__main"><p class="muted">No separate case rows for this role in the spreadsheet yet.</p></div>';
+    var mainParts = [];
+    if (chapterBlock) mainParts.push(chapterBlock);
+    if (caseRows.length) {
+      mainParts.push(casesSection);
+      if (pressBlock) mainParts.push(pressBlock);
+    } else if (legacyBlock) {
+      mainParts.push(legacyBlock);
+    } else {
+      mainParts.push(
+        '<p class="muted">No separate case rows for this role in the spreadsheet yet.</p>'
+      );
+    }
+    if (academicBlock) mainParts.push(academicBlock);
+
+    const mainContent =
+      '<div class="exp-layout__main">' + mainParts.join("") + "</div>";
 
     main.innerHTML =
       '<header class="page-head">' +
@@ -1143,23 +1230,136 @@
   }
 
   function formatNarrative(text) {
-    var escaped = escapeHtml(text);
-    var blocks = escaped.split(/\n\n+/);
-    return blocks.map(function (block) {
-      block = block.trim();
-      if (!block) return "";
-      var lines = block.split("\n");
+    const fullFixed = fixUtf8Mojibake(String(text || ""));
+    const paragraphs = fullFixed
+      .split(/\n{2,}/)
+      .map(function (p) { return p.trim(); })
+      .filter(function (p) { return p.length > 0; });
+
+    const knownHeadings = [
+      "short summary", "context", "the problem", "key insight",
+      "my role", "constraints", "the solution", "solution", "solution / exploration", "outcome",
+      "why this worked", "why this didn't scale", "what i learned"
+    ];
+
+    const skipLines = [
+      "that's excellent portfolio material.",
+      "that is very strong.",
+      "this is the most important section in a failed-case writeup.",
+      "that is actually quite a strong ending.",
+      "that is strong product judgment.",
+      "that is a subtle but important lesson.",
+      "that is the elegant version.",
+      "that is a strong strategic outcome.",
+      "that is a massive business result.",
+      "that is the true context.",
+      "that is a very mature product pattern:"
+    ];
+
+    let html = "";
+    var summaryBuffer = null;
+
+    function appendCaseHtml(fragment) {
+      if (summaryBuffer !== null) summaryBuffer.push(fragment);
+      else html += fragment;
+    }
+
+    function flushSummarySection() {
+      if (!summaryBuffer || summaryBuffer.length === 0) {
+        summaryBuffer = null;
+        return;
+      }
+      html +=
+        '<section class="case-summary-card" aria-labelledby="case-summary-heading">' +
+        '<div class="case-summary-card__inner">' +
+        '<h2 id="case-summary-heading" class="case-summary-card__label">Short summary</h2>' +
+        '<div class="case-summary-card__body">' +
+        summaryBuffer.join("") +
+        "</div></div></section>";
+      summaryBuffer = null;
+    }
+
+    paragraphs.forEach(function (p, i) {
+      const lower = p.toLowerCase().replace(/[\u2018\u2019]/g, "'");
+
+      if (skipLines.indexOf(lower) !== -1) return;
+
+      if (knownHeadings.indexOf(lower) !== -1) {
+        if (lower === "short summary") {
+          flushSummarySection();
+          summaryBuffer = [];
+          return;
+        }
+        flushSummarySection();
+        appendCaseHtml("<h2>" + escapeHtml(p) + "</h2>");
+        return;
+      }
+
+      if (i === 0 && p.length < 200 && p.indexOf("\n") === -1 && lower.indexOf("short summary") === -1) {
+        appendCaseHtml('<p class="case-lede">' + escapeHtml(p) + "</p>");
+        return;
+      }
+
+      var lines = p.split("\n");
       var isNumberedList = lines.length > 1 && lines.every(function (l) {
         return /^\d+\.\s/.test(l.trim()) || !l.trim();
       });
+
       if (isNumberedList) {
         var items = lines.filter(function (l) { return l.trim(); }).map(function (l) {
-          return "<li>" + l.trim().replace(/^\d+\.\s*/, "") + "</li>";
+          return "<li>" + escapeHtml(l.trim().replace(/^\d+\.\s*/, "")) + "</li>";
         }).join("");
-        return '<ol class="case-ol">' + items + "</ol>";
+        appendCaseHtml('<ol class="case-ol">' + items + "</ol>");
+        return;
       }
-      return "<p>" + block.replace(/\n/g, "<br />") + "</p>";
-    }).join("");
+
+      if (lines.length > 1) {
+        if (lines.length === 2 && (
+          lines[0].trim().endsWith(":") ||
+          lines[0].trim().endsWith(",") ||
+          (lines[0].trim().endsWith(".") && lines[1].trim().endsWith(".") && lines[0].length > 40)
+        )) {
+          const escaped = escapeHtml(p);
+          const strong = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+          const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
+          appendCaseHtml("<p>" + em.replace(/\n/g, "<br />") + "</p>");
+          return;
+        }
+
+        var listHtml = "";
+        var inList = false;
+
+        lines.forEach(function (l) {
+          var lt = l.trim();
+          if (!lt) return;
+
+          var isSubheader = /^[A-Z]/.test(lt) && !/[.,:;!?]$/.test(lt) && lt.length < 60;
+
+          if (isSubheader) {
+            if (inList) { listHtml += "</ul>"; inList = false; }
+            listHtml += '<h4 class="case-subpoint">' + escapeHtml(lt) + "</h4>";
+          } else {
+            if (!inList) { listHtml += '<ul class="case-ul">'; inList = true; }
+            const escaped = escapeHtml(lt.replace(/^[-*•]\s*/, ""));
+            const strong = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+            const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
+            listHtml += "<li>" + em + "</li>";
+          }
+        });
+
+        if (inList) { listHtml += "</ul>"; }
+        appendCaseHtml(listHtml);
+        return;
+      }
+
+      const escaped = escapeHtml(p);
+      const strong = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
+      appendCaseHtml("<p>" + em.replace(/\n/g, "<br />") + "</p>");
+    });
+
+    flushSummarySection();
+    return html;
   }
 
   /** Allow only same-site relative links in case narratives. */
@@ -1182,7 +1382,7 @@
    * Invalid or off-site links are left as plain escaped text.
    */
   function formatCaseNarrative(text) {
-    var raw = String(text);
+    var raw = fixUtf8Mojibake(String(text));
     var store = [];
     var idx = 0;
     var processed = raw.replace(/\[([^\]]*)\]\(([^)]*)\)/g, function (full, label, href) {
@@ -1260,14 +1460,19 @@
 
     const newsAside =
       rawUrls.length > 0
-        ? '<aside class="case-aside" aria-label="Related news and links">' +
-          "<h2>Related news &amp; links</h2>" +
-          '<ul class="case-related-news-list">' +
+        ? '<aside class="case-aside case-aside--news" aria-label="Related news">' +
+          "<h2>Related news</h2>" +
+          '<ul class="case-related-news-list case-related-news--links-only">' +
           rawUrls.map(function(u) {
             var raw = String(u || "").trim();
             return '<li><a href="' + escapeHtml(raw) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(relatedNewsTitleEn(raw) || raw) + "</a></li>";
           }).join("") +
-          "</ul></aside>"
+          "</ul>" +
+          '<div class="case-related-news--cards-only">' +
+          rawUrls.map(function(u) {
+            return newsLinkCardHtml(u, null);
+          }).join("") +
+          "</div></aside>"
         : "";
 
     const roleSubtitle = casePageRoleLineHtml(exp);
@@ -1288,7 +1493,12 @@
         renderCaseSection("Results", "results", rich.results) +
         renderCaseSection("Reflection", "reflection", rich.reflection);
     } else {
-      const narr = stripDuplicateHeadline(c.narrative, c.name);
+      const rawNarr = fixUtf8Mojibake(
+        c.longNarrative && String(c.longNarrative).trim()
+          ? c.longNarrative
+          : c.narrative || ""
+      );
+      const narr = stripDuplicateHeadline(rawNarr, fixUtf8Mojibake(c.name));
       bodyHtml =
         narr && narr.trim()
           ? '<div class="narrative">' + formatNarrative(narr) + "</div>"
@@ -1298,12 +1508,14 @@
     main.innerHTML =
       '<header class="page-head">' +
       "<h1>" +
-      escapeHtml(c.name) +
+      escapeHtml(fixUtf8Mojibake(c.name)) +
       "</h1>" +
       '<p class="page-head__role page-head__role--case">' +
       roleSubtitle +
       "</p></header>" +
-      '<div class="case-layout">' +
+      '<div class="case-layout' +
+      (rawUrls.length ? " case-layout--with-aside" : "") +
+      '">' +
       '<div class="case-layout__main">' +
       bodyHtml +
       "</div>" +

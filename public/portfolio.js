@@ -26,6 +26,30 @@ const Portfolio = (function () {
       .replace(/"/g, "&quot;");
   }
 
+  /** Fix UTF-8 text that was mis-decoded (e.g. â€™ → apostrophe). */
+  function fixUtf8Mojibake(str) {
+    if (!str || typeof str !== "string") return str;
+    return str
+      .replace(/â€™|â€˜/g, "'")
+      .replace(/â€œ/g, "\u201c")
+      .replace(/â€/g, "\u201d")
+      .replace(/â€"|â€"/g, "\u2014")
+      .replace(/â€“/g, "\u2013")
+      .replace(/â€¦/g, "\u2026")
+      .replace(/â€¢/g, "\u2022")
+      .replace(/Ã¡/g, "á")
+      .replace(/Ã©/g, "é")
+      .replace(/Ã­/g, "í")
+      .replace(/Ã³/g, "ó")
+      .replace(/Ãº/g, "ú")
+      .replace(/Ã£/g, "ã")
+      .replace(/Ã§/g, "ç")
+      .replace(/Ãª/g, "ê")
+      .replace(/Ãµ/g, "õ")
+      .replace(/Ã\u00a0/g, "à")
+      .replace(/Ã±/g, "ñ");
+  }
+
   /** @param {string} role */
   function splitExperienceRole(role) {
     const dashIndex = role.indexOf(" - ");
@@ -550,21 +574,184 @@ const Portfolio = (function () {
   }
 
   function formatNarrative(text) {
-    const paragraphs = String(text || "")
+    const fullFixed = fixUtf8Mojibake(String(text || ""));
+    const paragraphs = fullFixed
       .split(/\n{2,}/)
-      .map(function (p) {
-        return p.trim();
-      })
-      .filter(function (p) {
-        return p.length > 0;
+      .map(function (p) { return p.trim(); })
+      .filter(function (p) { return p.length > 0; });
+
+    const knownHeadings = [
+      "short summary", "context", "the problem", "key insight",
+      "my role", "constraints", "the solution", "solution", "solution / exploration", "outcome",
+      "why this worked", "why this didn't scale", "what i learned"
+    ];
+
+    const skipLines = [
+      "that's excellent portfolio material.",
+      "that is very strong.",
+      "this is the most important section in a failed-case writeup.",
+      "that is actually quite a strong ending.",
+      "that is strong product judgment.",
+      "that is a subtle but important lesson.",
+      "that is the elegant version.",
+      "that is a strong strategic outcome.",
+      "that is a massive business result.",
+      "that is the true context.",
+      "that is a very mature product pattern:"
+    ];
+
+    let html = "";
+    var seenBlocks = {};
+    var summaryBuffer = null;
+
+    function appendCaseHtml(fragment) {
+      if (summaryBuffer !== null) summaryBuffer.push(fragment);
+      else html += fragment;
+    }
+
+
+    function flushSummarySection() {
+      if (!summaryBuffer || summaryBuffer.length === 0) {
+        summaryBuffer = null;
+        return;
+      }
+      html +=
+        '<section class="case-summary-card" aria-labelledby="case-summary-heading">' +
+        '<div class="case-summary-card__inner">' +
+        '<h2 id="case-summary-heading" class="case-summary-card__label">Short summary</h2>' +
+        '<div class="case-summary-card__body">' +
+        summaryBuffer.join("") +
+        "</div></div></section>";
+      summaryBuffer = null;
+    }
+
+    paragraphs.forEach(function (p, i) {
+      const lower = p.toLowerCase().replace(/[\u2018\u2019]/g, "'");
+      if (seenBlocks[lower]) return;
+      seenBlocks[lower] = true;
+
+      if (skipLines.indexOf(lower) !== -1) return;
+      if (/^that is (clean|strong|excellent|a subtle|a very|the elegant)/.test(lower)) return;
+
+      if (knownHeadings.indexOf(lower) !== -1) {
+        if (lower === "short summary") {
+          flushSummarySection();
+          summaryBuffer = [];
+          return;
+        }
+        flushSummarySection();
+        var headingClass = "case-section-heading";
+        if (lower.indexOf("insight") !== -1) headingClass += " case-section-heading--insight";
+        if (lower.indexOf("constraint") !== -1) headingClass += " case-section-heading--constraint";
+        if (lower.indexOf("problem") !== -1 || lower.indexOf("solution") !== -1) headingClass += " case-section-heading--concept";
+        appendCaseHtml('<h2 class="' + headingClass + '">' + escapeHtml(p) + "</h2>");
+        return;
+      }
+
+      if (i === 0 && p.length < 200 && p.indexOf("\n") === -1 && lower.indexOf("short summary") === -1) {
+        appendCaseHtml('<p class="case-lede">' + escapeHtml(p) + "</p>");
+        return;
+      }
+
+      var lines = p.split("\n");
+      // First block in long narratives is often "title + subtitle"; the page already has H1.
+      // Keep only the subtitle as lede, never as bullets.
+      if (i === 0 && lines.length === 2) {
+        appendCaseHtml('<p class="case-lede">' + escapeHtml(lines[1].trim()) + "</p>");
+        return;
+      }
+      var isNumberedList = lines.length > 1 && lines.every(function (l) {
+        return /^\d+\.\s/.test(l.trim()) || !l.trim();
       });
-    return paragraphs
-      .map(function (p) {
-        const strong = p.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-        const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
-        return "<p>" + em + "</p>";
-      })
-      .join("");
+
+      if (isNumberedList) {
+        var items = lines.filter(function (l) { return l.trim(); }).map(function (l) {
+          var txt = l.trim().replace(/^\d+\.\s*/, "");
+          var parts = txt.split(/:\s+/);
+          if (parts.length > 1 && parts[0].length < 80) {
+            return '<li><span class="case-step-title">' + escapeHtml(parts[0]) + ':</span> ' + escapeHtml(parts.slice(1).join(": ")) + "</li>";
+          }
+          return "<li>" + escapeHtml(txt) + "</li>";
+        }).join("");
+        appendCaseHtml('<ol class="case-ol">' + items + "</ol>");
+        return;
+      }
+
+      if (lines.length > 1) {
+        var compareHeadings = lines.filter(function (l) { return /^in [^:]+:$/i.test(l.trim()); });
+        if (compareHeadings.length === 2) {
+          var cols = [];
+          var cur = null;
+          lines.forEach(function (l) {
+            var t = l.trim();
+            if (!t) return;
+            if (/^in [^:]+:$/i.test(t)) {
+              if (cur) cols.push(cur);
+              cur = { title: t.replace(/:$/, ""), items: [] };
+            } else if (cur) {
+              cur.items.push(t);
+            }
+          });
+          if (cur) cols.push(cur);
+          if (cols.length === 2) {
+            appendCaseHtml(
+              '<div class="case-compare-grid">' +
+                cols.map(function (c) {
+                  return '<section class="case-compare-col"><h4>' + escapeHtml(c.title) + '</h4><ul class="case-ul">' +
+                    c.items.map(function (it) { return "<li>" + escapeHtml(it) + "</li>"; }).join("") +
+                    "</ul></section>";
+                }).join("") +
+              "</div>"
+            );
+            return;
+          }
+        }
+        if (lines.length === 2 && (
+          lines[0].trim().endsWith(":") ||
+          lines[0].trim().endsWith(",") ||
+          (lines[0].trim().endsWith(".") && lines[1].trim().endsWith(".") && lines[0].length > 40)
+        )) {
+          const escaped = escapeHtml(p);
+          const strong = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+          const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
+          appendCaseHtml("<p>" + em.replace(/\n/g, "<br />") + "</p>");
+          return;
+        }
+
+        var listHtml = "";
+        var inList = false;
+
+        lines.forEach(function (l) {
+          var lt = l.trim();
+          if (!lt) return;
+
+          var isSubheader = (/^[A-Z]/.test(lt) && !/[.,;!?]$/.test(lt) && lt.length < 60) || /:$/.test(lt);
+
+          if (isSubheader) {
+            if (inList) { listHtml += "</ul>"; inList = false; }
+            listHtml += '<h4 class="case-subpoint">' + escapeHtml(lt.replace(/:$/, "")) + "</h4>";
+          } else {
+            if (!inList) { listHtml += '<ul class="case-ul">'; inList = true; }
+            const escaped = escapeHtml(lt.replace(/^[-*•]\s*/, ""));
+            const strong = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+            const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
+            listHtml += "<li>" + em + "</li>";
+          }
+        });
+
+        if (inList) { listHtml += "</ul>"; }
+        appendCaseHtml(listHtml);
+        return;
+      }
+
+      const escaped = escapeHtml(p);
+      const strong = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const em = strong.replace(/\*(.+?)\*/g, "<em>$1</em>");
+      appendCaseHtml("<p>" + em.replace(/\n/g, "<br />") + "</p>");
+    });
+
+    flushSummarySection();
+    return html;
   }
 
   function tenureLabel(tenure) {
@@ -1108,6 +1295,52 @@ const Portfolio = (function () {
       '<div id="chat-root" class="chat-root chat-root--home"></div>';
   }
 
+  /** One-line teaser for experience page case rows; optional per-case `caseTeaser` overrides. */
+  function caseTeaserText(caseItem) {
+    if (caseItem.caseTeaser && String(caseItem.caseTeaser).trim()) {
+      return String(caseItem.caseTeaser).trim();
+    }
+    var n = String(caseItem.narrative || "").trim();
+    if (!n) return "";
+    var dot = n.indexOf(". ");
+    if (dot > 0 && dot < 280) return n.slice(0, dot + 1).trim();
+    if (n.length <= 220) return n;
+    return n.slice(0, 217).trim() + "\u2026";
+  }
+
+  /** Deduped related-news URLs across cases in display order. */
+  function aggregatedPressBlock(caseRows) {
+    var seen = {};
+    var urls = [];
+    caseRows.forEach(function (row) {
+      (row.caseItem.relatedNews || []).forEach(function (u) {
+        var s = String(u || "").trim();
+        if (!s || seen[s]) return;
+        seen[s] = true;
+        urls.push(s);
+      });
+    });
+    if (!urls.length) return "";
+    var items = urls
+      .map(function (u) {
+        return (
+          '<li><a href="' +
+          escapeHtml(u) +
+          '" target="_blank" rel="noopener noreferrer">' +
+          escapeHtml(relatedNewsTitleEn(u) || u) +
+          "</a></li>"
+        );
+      })
+      .join("");
+    return (
+      '<section class="exp-press" aria-label="Press and media">' +
+      "<h2>Press &amp; media</h2>" +
+      '<ul class="exp-press__list">' +
+      items +
+      "</ul></section>"
+    );
+  }
+
   function renderExperience(main) {
     setHomePageMode(main, false);
     const id = decodeURIComponent((location.hash || "#").slice(1));
@@ -1147,49 +1380,57 @@ const Portfolio = (function () {
           "</div></section>"
         : "";
 
+    const chapterBlock =
+      exp.chapterSummary && String(exp.chapterSummary).trim()
+        ? '<section class="exp-chapter" aria-label="Role overview">' +
+          '<div class="exp-chapter__body narrative">' +
+          formatNarrative(exp.chapterSummary) +
+          "</div></section>"
+        : "";
+
     var caseRows = [];
     (exp.cases || []).forEach(function (c) {
       caseRows.push({ experience: exp, caseItem: c });
     });
     sortCasesLikeNav(caseRows);
-    const casesHtml = caseRows
+
+    const caseTeasersHtml = caseRows
       .map(function (row) {
         var c = row.caseItem;
-        const narr = c.narrative || "";
-        const body =
-          narr && narr.trim()
-            ? '<div class="narrative">' + formatNarrative(narr) + "</div>"
-            : '<p class="muted">Full narrative in the dedicated case page.</p>';
-        const relatedNewsItems =
-          c.relatedNews && c.relatedNews.length
-            ? c.relatedNews.map(function (u) {
-                return (
-                  '<li><a href="' +
-                  escapeHtml(String(u || "").trim()) +
-                  '" target="_blank" rel="noopener noreferrer">' +
-                  escapeHtml(relatedNewsTitleEn(u) || String(u || "").trim()) +
-                  "</a></li>"
-                );
-              }).join("")
-            : "";
-        const relatedNewsBlock = relatedNewsItems
-          ? '<section class="case-card__news"><h3>Related news</h3><ul class="case-card__news-list">' +
-            relatedNewsItems +
-            "</ul></section>"
-          : "";
+        var teaser = caseTeaserText(c);
+        var teaserEl = teaser
+          ? '<p class="exp-case-teaser__lede">' + escapeHtml(teaser) + "</p>"
+          : '<p class="muted exp-case-teaser__lede">Full write-up on the case page.</p>';
         return (
-          '<article class="case-block" id="' +
+          '<article class="exp-case-teaser" id="' +
           escapeHtml(c.id) +
           '">' +
-          "<h2>" +
+          '<h3 class="exp-case-teaser__title">' +
+          '<a href="case.html#' +
+          encodeURIComponent(c.id) +
+          '">' +
           escapeHtml(c.name) +
-          "</h2>" +
-          body +
-          relatedNewsBlock +
+          "</a></h3>" +
+          teaserEl +
+          '<a class="exp-case-teaser__cta" href="case.html#' +
+          encodeURIComponent(c.id) +
+          '">Read case study</a>' +
           "</article>"
         );
       })
       .join("");
+
+    const casesSection =
+      caseRows.length
+        ? '<section class="exp-case-studies" aria-label="Case studies">' +
+          "<h2>Case studies</h2>" +
+          '<div class="exp-case-studies__list">' +
+          caseTeasersHtml +
+          "</div></section>"
+        : "";
+
+    const pressBlock =
+      caseRows.length > 0 ? aggregatedPressBlock(caseRows) : "";
 
     const highlightsPane =
       exp.highlights && exp.highlights.length
@@ -1212,11 +1453,11 @@ const Portfolio = (function () {
         : "";
 
     var expPageParts = [];
+    if (chapterBlock) expPageParts.push(chapterBlock);
     if (panelsBlock) expPageParts.push(panelsBlock);
     if (caseRows.length) {
-      expPageParts.push(
-        '<div class="exp-case-stories" aria-label="Cases">' + casesHtml + "</div>"
-      );
+      expPageParts.push(casesSection);
+      if (pressBlock) expPageParts.push(pressBlock);
     } else if (legacyBlock) {
       expPageParts.push(legacyBlock);
     } else {
@@ -1278,22 +1519,42 @@ const Portfolio = (function () {
           "</p>"
         : "";
 
-    const relatedNewsHtml =
-      c.relatedNews && c.relatedNews.length
-        ? '<ul class="case-related-news-list">' +
-          c.relatedNews
-            .map(function (u) {
-              return (
-                '<li><a href="' +
-                escapeHtml(u) +
-                '" target="_blank" rel="noopener noreferrer">' +
-                escapeHtml(relatedNewsTitleEn(u) || u) +
-                "</a></li>"
-              );
-            })
-            .join("") +
-          "</ul>"
-        : "";
+    const dedupNews = (c.relatedNews || []).filter(function (u, idx, arr) {
+      var s = String(u || "").trim();
+      if (!s) return false;
+      return arr.findIndex(function (x) { return String(x || "").trim() === s; }) === idx;
+    });
+    const hasNews = dedupNews.length > 0;
+    const relatedMobile = hasNews
+      ? '<section id="case-related-news" class="case-related-news-mobile" aria-label="Related news">' +
+        "<h3>RELATED NEWS</h3>" +
+        '<ul class="case-related-news-list">' +
+        dedupNews
+          .map(function (u) {
+            return (
+              '<li><a href="' +
+              escapeHtml(u) +
+              '" target="_blank" rel="noopener noreferrer">' +
+              escapeHtml(relatedNewsTitleEn(u) || u) +
+              "</a></li>"
+            );
+          })
+          .join("") +
+        "</ul>" +
+        "</section>"
+      : "";
+    const relatedAside = hasNews
+      ? '<aside id="case-related-news-desktop" class="case-aside case-aside--news" aria-label="Related news">' +
+        "<h2>Related news</h2>" +
+        '<div class="case-related-news--cards-only">' +
+        dedupNews
+          .map(function (u) {
+            return newsLinkCardHtml(u, null);
+          })
+          .join("") +
+        "</div>" +
+        "</aside>"
+      : "";
 
     const metaBlock =
       '<p class="page-head__role page-head__role--case">' +
@@ -1306,27 +1567,37 @@ const Portfolio = (function () {
             return '<span class="tag">' + escapeHtml(t) + "</span>";
           }).join("") +
           "</p>"
-        : "") +
-      "<p class=\"facts\"><strong>Related news</strong></p>" +
-      (relatedNewsHtml || "<p class=\"muted\">No related news yet.</p>");
+        : "");
 
-    const narrativeHtml = c.narrative
-      ? '<div class="narrative case-narrative">' + formatNarrative(c.narrative) + "</div>"
+    const rawNarrative =
+      c.longNarrative && String(c.longNarrative).trim()
+        ? c.longNarrative
+        : c.narrative;
+    const narrativeHtml = rawNarrative
+      ? '<div class="narrative case-narrative">' + formatNarrative(rawNarrative) + "</div>"
       : '<p class="muted">No narrative yet.</p>';
 
     main.innerHTML =
       '<header class="page-head case-header">' +
       brandRow +
       "<h1>" +
-      escapeHtml(c.name) +
+      escapeHtml(fixUtf8Mojibake(c.name)) +
       "</h1>" +
       metaBlock +
       "</header>" +
-      '<div class="case-layout">' +
+      '<div class="case-layout' +
+      (hasNews ? " case-layout--with-aside" : "") +
+      '">' +
       '<div class="case-layout__main">' +
+      relatedMobile +
       narrativeHtml +
       "</div>" +
+      relatedAside +
       "</div>";
+
+    requestAnimationFrame(function () {
+      enhanceNewsCardTitles(main);
+    });
   }
 
   function renderCasesIndex(main) {
