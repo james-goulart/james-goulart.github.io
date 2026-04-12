@@ -182,6 +182,40 @@
   margin-bottom: 0.2rem;
 }
 
+/* Related cases: replace company name with wordmark (compact, ~ eyebrow height) */
+.case-aside__eyebrow.case-aside__eyebrow--related-co {
+  display: flex;
+  align-items: center;
+  min-height: 1.2rem;
+  margin-bottom: 0.25rem;
+  font-size: unset;
+  font-weight: unset;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.case-related-wordmark {
+  display: block;
+  max-height: 1.45rem;
+  width: auto;
+  max-width: 128px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.case-related-wordmark--icon {
+  max-height: 1.15rem;
+  max-width: 30px;
+}
+
+.case-related-company-fallback {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
 .case-aside__title {
   display: block;
   font-size: 0.88rem;
@@ -255,6 +289,26 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
+}
+
+.case-related-card__eyebrow.case-related-card__eyebrow--related-co {
+  display: block;
+  margin-bottom: 0.55rem;
+  font-size: unset;
+  font-weight: unset;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.case-related-card__role {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .case-related-card__title {

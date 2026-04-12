@@ -126,6 +126,32 @@
     );
   }
 
+  /** Full wordmark for related-case rows; icon fallback; text if no asset. */
+  function relatedCaseCompanyMarkHtml(exp) {
+    if (!exp || !exp.company) return "";
+    var wm = companyWordmarkSrc(exp.company);
+    var ic = companyIconSrc(exp.company);
+    var src = wm || ic;
+    if (!src) {
+      return (
+        '<span class="case-related-company-fallback">' +
+        escapeHtml(exp.company) +
+        "</span>"
+      );
+    }
+    var cls = "case-related-wordmark";
+    if (!wm && ic) cls += " case-related-wordmark--icon";
+    return (
+      '<img class="' +
+      cls +
+      '" src="' +
+      escapeHtml(src) +
+      '" alt="' +
+      escapeHtml(exp.company) +
+      '" loading="lazy" />'
+    );
+  }
+
   function applyInlineMarkdown(text) {
     var source = String(text == null ? "" : text);
     var output = "";
@@ -577,7 +603,12 @@
       related.map(function (item) {
         return (
           '<a class="case-related-card" href="case.html#' + encodeURIComponent(item.caseItem.id) + '">' +
-          '<span class="case-related-card__eyebrow">' + escapeHtml(item.experience.company) + " · " + escapeHtml(item.experience.role) + "</span>" +
+          '<span class="case-related-card__eyebrow case-related-card__eyebrow--related-co">' +
+          relatedCaseCompanyMarkHtml(item.experience) +
+          "</span>" +
+          '<span class="case-related-card__role">' +
+          escapeHtml(item.experience.role) +
+          "</span>" +
           '<span class="case-related-card__title">' + escapeHtml(item.caseItem.name) + "</span>" +
           '<span class="case-related-card__meta">' + escapeHtml(item.caseItem.narrative || "") + "</span>" +
           "</a>"
@@ -598,7 +629,9 @@
         return (
           "<li>" +
           '<a class="case-aside__link" href="case.html#' + encodeURIComponent(item.caseItem.id) + '">' +
-          '<span class="case-aside__eyebrow">' + escapeHtml(item.experience.company) + "</span>" +
+          '<span class="case-aside__eyebrow case-aside__eyebrow--related-co">' +
+          relatedCaseCompanyMarkHtml(item.experience) +
+          "</span>" +
           '<span class="case-aside__title">' + escapeHtml(item.caseItem.name) + "</span>" +
           "</a></li>"
         );
