@@ -1876,4 +1876,5 @@ const Portfolio = (function () {
     relatedNewsTitleEn: relatedNewsTitleEn,
   };
 })();
+
 window.Portfolio = Portfolio;
