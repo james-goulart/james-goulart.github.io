@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>James Goulart - Product Leader</title>
+    <title>James Goulart - AI Product Leader</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./experience-enhancements.css" />
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   </head>
   <body>
@@ -18,6 +19,9 @@
     <main id="main" class="page"></main>
     <script src="./data.js"></script>
     <script src="./portfolio.js"></script>
+    <script src="./experience-page-meta.js"></script>
+    <script src="./experience-page-helpers.js"></script>
+    <script src="./experience-page-render.js"></script>
     <script>
       function go() {
         var id = decodeURIComponent((location.hash || "#").slice(1));
@@ -29,7 +33,7 @@
           Portfolio.renderExperiencesIndex(document.getElementById("main"));
         }
         var t = document.querySelector("title");
-        if (t) t.textContent = "James Goulart - Product Leader";
+        if (t) t.textContent = "James Goulart - AI Product Leader";
       }
       document.addEventListener("DOMContentLoaded", go);
       window.addEventListener("hashchange", go);
