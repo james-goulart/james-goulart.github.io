@@ -516,7 +516,7 @@ const Portfolio = (function () {
 
   function injectNav(container, active) {
     if (!container) return;
-    active = active || "home";
+    active = active || "overview";
     const expMenu = buildExperiencesNavHtml(active);
     const casesMenu = buildCasesNavHtml(active);
     const casesParentActive =
@@ -528,13 +528,15 @@ const Portfolio = (function () {
 
     container.innerHTML =
       '<div class="nav-inner">' +
-      '<a class="nav-brand" href="index.html">' +
+      '<a class="nav-brand' +
+      (active === "overview" ? " is-active" : "") +
+      '" href="overview.html">' +
       brandName() +
       "</a>" +
       '<div class="nav-center-wrap">' +
       '<ul id="nav-menu" class="nav-menu">' +
-      '<li><a href="index.html"' +
-      (active === "home" ? ' class="is-active"' : "") +
+      '<li><a href="copilot.html"' +
+      (active === "copilot" ? ' class="is-active"' : "") +
       ">copilot</a></li>" +
       '<li class="nav-has-sub nav-has-sub--exp">' +
       '<a href="experience.html" class="nav-label' +
@@ -1349,7 +1351,7 @@ const Portfolio = (function () {
     });
     if (!exp) {
       main.innerHTML =
-        '<p class="empty">Experience not found. <a href="index.html">Back home</a>.</p>';
+        '<p class="empty">Experience not found. <a href="overview.html">Back home</a>.</p>';
       return;
     }
 
@@ -1868,3 +1870,5 @@ const Portfolio = (function () {
     relatedNewsTitleEn: relatedNewsTitleEn,
   };
 })();
+
+window.Portfolio = Portfolio;

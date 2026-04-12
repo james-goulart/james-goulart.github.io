@@ -3,36 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>James Goulart - Product Leader</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./styles.css" />
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <title>James Goulart</title>
+    <meta http-equiv="refresh" content="0;url=overview.html" />
+    <link rel="canonical" href="./overview.html" />
+    <script>
+      location.replace("./overview.html");
+    </script>
   </head>
   <body>
-    <header id="site-nav" class="site-nav" aria-label="Primary"></header>
-    <main id="main" class="page"></main>
-    <script src="./data.js"></script>
-    <script src="./portfolio.js"></script>
-    <script>
-      window.JamesCVBotConfig = window.JamesCVBotConfig || {};
-      window.JamesCVBotConfig.chatBackendUrl =
-        "https://james-portfolio-chat.james-portfolio-chat.workers.dev";
-    </script>
-    <script src="./chat.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        Portfolio.injectNav(document.getElementById("site-nav"), "home");
-        Portfolio.renderHome(document.getElementById("main"));
-        var chatRoot = document.getElementById("chat-root");
-        if (chatRoot && window.JamesCVBot) {
-          JamesCVBot.init(chatRoot);
-        }
-      });
-    </script>
+    <p><a href="./overview.html">Continue to overview</a></p>
   </body>
 </html>

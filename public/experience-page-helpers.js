@@ -63,6 +63,57 @@
     return map[company] || null;
   }
 
+  /** Compact logo for experience flagship / related cards (~ eyebrow text height). */
+  function experienceCardLogoHtml(exp) {
+    var wm = companyWordmarkSrc(exp.company);
+    var ic = companyIconSrc(exp.company);
+    var src = wm || ic;
+    if (!src) return "";
+    var cls =
+      "experience-card-logo" +
+      (wm ? " experience-card-logo--wordmark" : " experience-card-logo--icon");
+    return (
+      '<img class="' +
+      cls +
+      '" src="' +
+      escapeHtml(src) +
+      '" alt="" loading="lazy" decoding="async" />'
+    );
+  }
+
+  /** Split "Lead part — tail" for related-experience titles (second line, normal weight). */
+  function splitComposedRoleTitle(text) {
+    var s = String(text || "").trim();
+    var idx = s.search(/\s[-–—]\s/);
+    if (idx !== -1) {
+      return {
+        first: s.slice(0, idx).trim(),
+        second: s.slice(idx).replace(/^\s*[-–—]\s*/, "").trim()
+      };
+    }
+    idx = s.search(/[–—]/);
+    if (idx > 0) {
+      return {
+        first: s.slice(0, idx).trim(),
+        second: s.slice(idx + 1).trim()
+      };
+    }
+    return { first: s, second: "" };
+  }
+
+  function pressSourceLabel(url) {
+    try {
+      var u = new URL(String(url || "").trim());
+      var host = u.hostname.replace(/^www\./i, "");
+      if (host === "youtu.be" || host === "youtube.com" || host.endsWith(".youtube.com")) {
+        return "YouTube";
+      }
+      return host || "Press";
+    } catch (e) {
+      return "Press";
+    }
+  }
+
   function brandRow(exp) {
     var wm = companyWordmarkSrc(exp.company);
     var ic = companyIconSrc(exp.company);
@@ -183,7 +234,8 @@
     urls = uniqueStrings(urls);
     if (!urls.length) return '';
     return '<section class="experience-aside__section"><h2>Related press</h2><ul class="experience-aside__links">' + urls.map(function (url) {
-      return '<li><a class="experience-aside__link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer"><span class="experience-aside__eyebrow">Press</span><span class="experience-aside__title">' + escapeHtml(relatedNewsTitleEn(url) || url) + '</span></a></li>';
+      var source = pressSourceLabel(url);
+      return '<li><a class="experience-aside__link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer"><span class="experience-aside__source">' + escapeHtml(source) + '</span><span class="experience-aside__title">' + escapeHtml(relatedNewsTitleEn(url) || url) + '</span></a></li>';
     }).join('') + '</ul></section>';
   }
 
@@ -193,7 +245,25 @@
     return '<section class="experience-flagship" aria-labelledby="experience-flagship-heading"><div class="experience-flagship__head"><h2 id="experience-flagship-heading">Flagship work</h2><a class="experience-flagship__browse" href="cases.html">Browse all cases</a></div><div class="experience-flagship__grid">' + rows.map(function (row) {
       var narrative = row.caseItem.narrative || '';
       var shortMetric = narrative.length > 110 ? narrative.slice(0, 107).trim() + '…' : narrative;
-      return '<a class="experience-flagship-card" href="case.html#' + encodeURIComponent(row.caseItem.id) + '"><span class="experience-flagship-card__eyebrow">' + escapeHtml(row.experience.company) + ' • ' + escapeHtml(row.experience.role) + '</span><span class="experience-flagship-card__title">' + escapeHtml(row.caseItem.name) + '</span><span class="experience-flagship-card__meta">' + escapeHtml(shortMetric) + '</span></a>';
+      var logo = experienceCardLogoHtml(row.experience);
+      var brand =
+        logo ||
+        '<span class="experience-flagship-card__company-fallback">' +
+          escapeHtml(row.experience.company) +
+          "</span>";
+      return (
+        '<a class="experience-flagship-card" href="case.html#' +
+        encodeURIComponent(row.caseItem.id) +
+        '"><span class="experience-flagship-card__brand">' +
+        brand +
+        '</span><span class="experience-flagship-card__role">' +
+        escapeHtml(row.experience.role) +
+        '</span><span class="experience-flagship-card__title">' +
+        escapeHtml(row.caseItem.name) +
+        '</span><span class="experience-flagship-card__meta">' +
+        escapeHtml(shortMetric) +
+        "</span></a>"
+      );
     }).join('') + '</div></section>';
   }
 
@@ -202,7 +272,32 @@
     if (!rows.length) return '';
     return '<section class="experience-related-experiences" aria-labelledby="related-experiences-heading"><h2 id="related-experiences-heading">Related experiences</h2><div class="experience-related-experiences__grid">' + rows.map(function (exp) {
       var supporting = (exp.highlights && exp.highlights[0]) || (exp.legacySummary || '');
-      return '<a class="experience-related-card" href="experience.html#' + encodeURIComponent(exp.id) + '"><span class="experience-related-card__eyebrow">' + escapeHtml(exp.company) + '</span><span class="experience-related-card__title">' + escapeHtml(exp.role) + '</span><span class="experience-related-card__meta">' + escapeHtml(supporting) + '</span></a>';
+      var logo = experienceCardLogoHtml(exp);
+      var brand =
+        logo ||
+        '<span class="experience-related-card__company-fallback">' +
+          escapeHtml(exp.company) +
+          "</span>";
+      var parts = splitComposedRoleTitle(exp.role);
+      var titleHtml =
+        parts.second
+          ? '<span class="experience-related-card__title experience-related-card__title--split"><span class="experience-related-card__title-strong">' +
+            escapeHtml(parts.first) +
+            '</span><span class="experience-related-card__title-rest">' +
+            escapeHtml(parts.second) +
+            "</span></span>"
+          : '<span class="experience-related-card__title">' + escapeHtml(parts.first) + "</span>";
+      return (
+        '<a class="experience-related-card" href="experience.html#' +
+        encodeURIComponent(exp.id) +
+        '"><span class="experience-related-card__brand">' +
+        brand +
+        "</span>" +
+        titleHtml +
+        '<span class="experience-related-card__meta">' +
+        escapeHtml(supporting) +
+        "</span></a>"
+      );
     }).join('') + '</div></section>';
   }
 

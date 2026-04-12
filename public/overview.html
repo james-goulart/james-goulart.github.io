@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>James Goulart - Staff-level AI Product Leader</title>
+    <title>James Goulart - AI Product Leader</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <style>
       .phase1-shell { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
       .phase1-hero { max-width: 860px; margin: 0 0 2.25rem; }
@@ -23,8 +24,9 @@
       .phase1-section h2 { margin: 0 0 0.35rem; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: -0.03em; }
       .phase1-section > p { margin: 0 0 1.1rem; color: var(--muted); }
       .phase1-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-      .phase1-case { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.15rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); }
-      .phase1-case h3 { margin: 0 0 0.55rem; font-size: 1rem; line-height: 1.35; }
+      .phase1-case { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.15rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); font-size: 1rem; }
+      .phase1-case__logo { display: block; height: 1.35em; width: auto; max-width: 100%; object-fit: contain; object-position: left center; margin: 0 0 0.65rem; }
+      .phase1-case h3 { margin: 0 0 0.55rem; font-size: 1em; line-height: 1.35; }
       .phase1-case p { margin: 0 0 0.85rem; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
       .phase1-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1rem; }
       .phase1-panel { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.2rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); }
@@ -38,14 +40,15 @@
     </style>
   </head>
   <body>
+    <header id="site-nav" class="site-nav" aria-label="Primary"></header>
     <main class="phase1-shell">
       <section class="phase1-hero">
         <p class="phase1-kicker">overview</p>
-        <h1 class="phase1-title">Staff-level AI Product Leader</h1>
+        <h1 class="phase1-title">AI Product Leader</h1>
         <p class="phase1-subtitle">Search, marketplaces, retrieval, trust, and LLM-native product experiences. I build products where user intent, system quality, and business outcomes have to work together.</p>
         <div class="phase1-actions">
-          <a class="btn btn--primary" href="cases.html">View featured case studies</a>
-          <a class="btn btn--ghost" href="index.html">Open portfolio copilot</a>
+          <a class="btn btn--primary" href="copilot.html">Open portfolio copilot</a>
+          <a class="btn btn--ghost" href="cases.html">View featured case studies</a>
         </div>
       </section>
 
@@ -73,16 +76,19 @@
         <p>Three cases that best represent how I work across AI, search, systems, and business design.</p>
         <div class="phase1-cases">
           <article class="phase1-case">
+            <img class="phase1-case__logo" src="./assets/images/logos/quintoandar-logo.svg" width="184" height="25" alt="QuintoAndar" decoding="async" />
             <h3>Conversational Search, Qualification, and Trust</h3>
             <p>QuintoAndar's first LLM product. Multimodal search combining natural language, visual retrieval, qualification rules, and confidence-aware UX.</p>
             <a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision">Read case study</a>
           </article>
           <article class="phase1-case">
+            <img class="phase1-case__logo" src="./assets/images/logos/quintoandar-logo.svg" width="184" height="25" alt="QuintoAndar" decoding="async" />
             <h3>Search, Qualification, and Quality</h3>
             <p>A full-stack search thesis across UI, filters, geography, retrieval, maps, and result trust.</p>
             <a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality">Read case study</a>
           </article>
           <article class="phase1-case">
+            <img class="phase1-case__logo" src="./assets/images/logos/quintoandar-logo.svg" width="184" height="25" alt="QuintoAndar" decoding="async" />
             <h3>From Marketplace Clone to Sales Engine</h3>
             <p>Operating-model redesign across agent continuity, qualification, lead allocation, and funnel structure. Helped drive 9x growth in signed contracts.</p>
             <a href="case.html#quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth">Read case study</a>
@@ -107,7 +113,7 @@
             <h3>Explore the portfolio with the copilot</h3>
             <p>Use the portfolio copilot to jump directly into AI experience, strongest outcomes, marketplace work, fintech systems, leadership scope, or the most relevant case studies.</p>
             <ul>
-              <li><a href="index.html">Open the copilot</a></li>
+              <li><a href="copilot.html">Open the copilot</a></li>
               <li><a href="experience.html?exp=professional">Browse experiences</a></li>
               <li><a href="news.html">See press and mentions</a></li>
             </ul>
@@ -115,5 +121,12 @@
         </div>
       </section>
     </main>
+    <script src="./data.js"></script>
+    <script src="./portfolio.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        Portfolio.injectNav(document.getElementById("site-nav"), "overview");
+      });
+    </script>
   </body>
 </html>

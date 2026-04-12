@@ -86,12 +86,11 @@
   text-decoration: underline;
 }
 
-.experience-aside__eyebrow {
+.experience-aside__source {
   display: block;
   font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--muted);
   margin-bottom: 0.2rem;
 }
@@ -246,14 +245,47 @@
   transform: translateY(-2px);
 }
 
-.experience-flagship-card__eyebrow,
-.experience-related-card__eyebrow {
+.experience-card-logo {
   display: block;
-  margin-bottom: 0.45rem;
+  width: auto;
+  max-width: 132px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.experience-card-logo--wordmark {
+  max-height: 1.05rem;
+}
+
+.experience-card-logo--icon {
+  max-height: 1.15rem;
+  max-width: 72px;
+}
+
+.experience-flagship-card__brand,
+.experience-related-card__brand {
+  display: block;
+  margin-bottom: 0.4rem;
+  min-height: 1.05rem;
+}
+
+.experience-flagship-card__company-fallback,
+.experience-related-card__company-fallback {
+  display: block;
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.experience-flagship-card__role {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.35;
   color: var(--muted);
 }
 
@@ -266,6 +298,25 @@
   color: var(--text);
 }
 
+.experience-related-card__title--split {
+  font-weight: 400;
+}
+
+.experience-related-card__title-strong {
+  display: block;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.experience-related-card__title-rest {
+  display: block;
+  margin-top: 0.2rem;
+  font-weight: 400;
+  font-size: 0.92em;
+  line-height: 1.35;
+  color: var(--text);
+}
+
 .experience-flagship-card__meta,
 .experience-related-card__meta {
   display: block;
@@ -273,6 +324,31 @@
   font-size: 0.82rem;
   line-height: 1.55;
   color: var(--muted);
+}
+
+/* Experience page: outcome pills — up to four per row (avoid one stretched pill). */
+header.experience-header + section.case-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+header.experience-header + section.case-metrics .metric-pill {
+  flex: none !important;
+  min-width: 0;
+  max-width: none;
+}
+
+@media (max-width: 1100px) {
+  header.experience-header + section.case-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  header.experience-header + section.case-metrics {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
