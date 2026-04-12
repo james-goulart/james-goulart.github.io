@@ -154,15 +154,52 @@
     return output;
   }
 
+  /**
+   * Consecutive blocks that are each a single numbered line were split by blank
+   * lines in source; each became its own <ol> and showed "1." — merge into one block.
+   */
+  function mergeAdjacentSingleNumberedBlocks(blocks) {
+    var out = [];
+    for (var i = 0; i < blocks.length; i++) {
+      var b = blocks[i];
+      var lines = b.split("\n").map(function (l) {
+        return l.trim();
+      }).filter(Boolean);
+      if (lines.length === 1 && /^\d+\.\s/.test(lines[0])) {
+        var merged = [lines[0]];
+        while (i + 1 < blocks.length) {
+          var nextLines = blocks[i + 1]
+            .split("\n")
+            .map(function (l) {
+              return l.trim();
+            })
+            .filter(Boolean);
+          if (nextLines.length === 1 && /^\d+\.\s/.test(nextLines[0])) {
+            merged.push(nextLines[0]);
+            i++;
+          } else {
+            break;
+          }
+        }
+        out.push(merged.join("\n"));
+      } else {
+        out.push(b);
+      }
+    }
+    return out;
+  }
+
   function renderRichText(text) {
     if (!text) return "";
-    var paragraphs = String(text)
-      .trim()
-      .split(/\n\s*\n/)
-      .map(function (block) {
-        return block.trim();
-      })
-      .filter(Boolean);
+    var paragraphs = mergeAdjacentSingleNumberedBlocks(
+      String(text)
+        .trim()
+        .split(/\n\s*\n/)
+        .map(function (block) {
+          return block.trim();
+        })
+        .filter(Boolean)
+    );
 
     return paragraphs
       .map(function (block) {

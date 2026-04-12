@@ -1183,16 +1183,23 @@ const Portfolio = (function () {
     ],
     Fintech: [
       "nexoos-product-owner-inverted-loan-request-ux",
-      "nexoos-product-owner-inverted-credit-bureau-proxy-from-risk-to-growth",
+      "nexoos-head-of-product-data-investor-wallet",
+      "nexoos-head-of-product-data-funding-channel-sorting-hat",
+      "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons",
     ],
     UX: [
       "nexoos-product-owner-inverted-loan-request-ux",
       "quintoandar-product-manager-rental-liquidity-irent",
+      "quintoandar-product-manager-rental-liquidity-smartpricing",
+      "quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth",
+      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
+      "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
+      "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons",
     ],
   };
 
   /**
-   * Single canonical order: conversation → search quality → forsale → … → loan → credit bureau.
+   * Single canonical order: conversation → search quality → forsale → … → Nexoos.
    * Used for /cases, cases nav, and category sublists (by this order within each filter).
    */
   const CASE_DISPLAY_ORDER = [
@@ -1206,7 +1213,6 @@ const Portfolio = (function () {
     "nexoos-head-of-product-data-funding-channel-sorting-hat",
     "nexoos-head-of-product-data-investor-wallet",
     "nexoos-product-owner-inverted-loan-request-ux",
-    "nexoos-product-owner-inverted-credit-bureau-proxy-from-risk-to-growth",
   ];
 
   function sortIdsByDisplayOrder(idList) {
