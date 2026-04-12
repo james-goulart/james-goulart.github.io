@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Built the first serious LLM product",
+    "body": "Led QuintoAndar's first serious LLM product in search, combining natural language, visual retrieval, qualification rules, and trust-sensitive UX.",
+    "theme": "AI",
+    "linked_case_id": "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision"
+  },
+  {
+    "title": "Search that moved contracts",
+    "body": "Led discovery and search work that improved signed contracts across rental and for-sale marketplaces.",
+    "theme": "Search",
+    "linked_case_id": "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality"
+  },
+  {
+    "title": "9x marketplace growth",
+    "body": "Helped drive 9x growth in for-sale signed contracts through operating-model redesign across qualification, agents, and funnel structure.",
+    "theme": "Marketplace",
+    "linked_case_id": "quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth"
+  },
+  {
+    "title": "Fintech and transaction systems",
+    "body": "Built financial add-ons and lending flows with meaningful adoption, better unit economics, and strong operational outcomes.",
+    "theme": "Fintech",
+    "linked_case_id": "quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons"
+  }
+]
