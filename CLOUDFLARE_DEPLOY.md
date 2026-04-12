@@ -1,5 +1,7 @@
 # Deploy Chat Backend to Cloudflare Workers
 
+The [portfolio copilot](https://james-goulart.github.io/copilot.html) on GitHub Pages calls this Worker for `/api/chat`. The static UI is still served from [GitHub Pages](https://james-goulart.github.io/); the Worker bundles `public/` for previews and hosts the chat API.
+
 ## 1) One-time setup
 
 ```bash

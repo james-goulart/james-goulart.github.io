@@ -2,6 +2,8 @@
 
 This document explains the intended content model for the portfolio.
 
+**Where it shows up today:** structured case bodies in [`cases-content.js`](../public/cases-content.js) and the main graph in [`data.js`](../public/data.js); [live cases](https://james-goulart.github.io/cases.html).
+
 ## Goal
 
 The portfolio should make it easy to understand three layers of information:

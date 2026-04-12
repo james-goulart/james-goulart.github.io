@@ -2,6 +2,8 @@
 
 This document describes the purpose of the new directories added in the Phase 3 organization pass.
 
+**Live portfolio:** [Overview (site home)](https://james-goulart.github.io/overview.html) · [Repository root](../README.md)
+
 ## Objective
 
 Make the repository easier to understand for:
@@ -64,5 +66,5 @@ A non-breaking organization pass creates immediate value:
 
 1. mirror key content into `/content`
 2. move implementation files into `/src`
-3. make `/overview.html` or the homepage the stronger first stop for applications
+3. make [`/overview.html`](https://james-goulart.github.io/overview.html) the stronger first stop for applications (done for the live site; root `index.html` redirects there)
 4. add diagrams and screenshots to support repository scanning

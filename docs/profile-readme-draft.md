@@ -1,18 +1,20 @@
 # James Goulart
 
-**Staff-level AI Product Leader**
+**AI Product Leader**
 
 Search, marketplaces, retrieval, trust, and LLM-native product experiences.
 
 I build products where user intent, system quality, and business outcomes all have to work together.
 
+**Portfolio:** [james-goulart.github.io](https://james-goulart.github.io/) · [Overview](https://james-goulart.github.io/overview.html) · [Copilot](https://james-goulart.github.io/copilot.html) · [Cases](https://james-goulart.github.io/cases.html)
+
 ## Selected proof
 
-- Built QuintoAndar's first serious LLM product in search
-- Led discovery and search work that improved signed contracts across rental and for-sale marketplaces
-- Helped drive 9x growth in for-sale signed contracts through operating-model redesign
-- Built financial add-ons that improved rental unit economics
-- Redesigned critical fintech journeys with large conversion and operational gains
+- Built QuintoAndar's first serious LLM product in search — [case study](https://james-goulart.github.io/case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision)
+- Led discovery and search work that improved signed contracts across rental and for-sale marketplaces — [cases](https://james-goulart.github.io/cases.html)
+- Helped drive 9x growth in for-sale signed contracts through operating-model redesign — [case study](https://james-goulart.github.io/case.html#quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth)
+- Built financial add-ons that improved rental unit economics — [case study](https://james-goulart.github.io/case.html#quintoandar-sr-product-manager-rental-financial-products-improving-rental-economics-through-desirable-finantial-add-ons)
+- Redesigned critical fintech journeys with large conversion and operational gains — [fintech cases](https://james-goulart.github.io/cases.html?cat=Fintech)
 
 ## What I do best
 
@@ -24,19 +26,22 @@ I build products where user intent, system quality, and business outcomes all ha
 
 ## Best public entry points
 
-- **Portfolio site:** flagship cases across AI, search, marketplaces, and fintech
-- **Case studies:** detailed narratives with measurable outcomes and decision logic
+- **Portfolio site:** [flagship overview](https://james-goulart.github.io/overview.html) — cases across AI, search, marketplaces, and fintech
+- **Case studies:** [structured case library](https://james-goulart.github.io/cases.html) with measurable outcomes and decision logic
 - **GitHub:** public artifacts showing product thinking, evaluation discipline, and technical fluency
 
 ## Signature cases
 
-### Conversational Search, Qualification, and Trust
+### [Conversational Search, Qualification, and Trust](https://james-goulart.github.io/case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision)
+
 QuintoAndar's first LLM product. Conversational and multimodal property search with qualification rules, visual retrieval, trust-sensitive ranking, and confidence-aware UX.
 
-### Search, Qualification, and Quality
+### [Search, Qualification, and Quality](https://james-goulart.github.io/case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality)
+
 A full-stack discovery thesis spanning UI, filters, geography, retrieval, and result trust.
 
-### From Marketplace Clone to Sales Engine
+### [From Marketplace Clone to Sales Engine](https://james-goulart.github.io/case.html#quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth)
+
 Operating-model redesign across agents, qualification, lead allocation, and sales flow. Helped drive 9x growth in signed contracts.
 
 ## What I believe about AI products

@@ -2,6 +2,8 @@
 
 This document proposes the Phase 1 rewrite for the homepage above the fold.
 
+**Shipped on the live site as** [Overview](https://james-goulart.github.io/overview.html) (site home; root `/` redirects there). Copilot lives at [copilot.html](https://james-goulart.github.io/copilot.html).
+
 The goal is to make the site read less like a generic portfolio and more like the public profile of a Staff-level AI Product leader.
 
 ---

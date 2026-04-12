@@ -2,13 +2,15 @@
 
 This document explains how the portfolio currently works, what its strengths are, and how the repository should evolve from a deployment-oriented static site into a cleaner flagship product repository.
 
+**Live site:** [james-goulart.github.io](https://james-goulart.github.io/) · [Overview](https://james-goulart.github.io/overview.html) · [Copilot](https://james-goulart.github.io/copilot.html) · [Cases](https://james-goulart.github.io/cases.html)
+
 ## Current architecture
 
 The current portfolio is a static site with a lightweight client-side rendering layer.
 
 ### Runtime model
 
-- HTML entrypoints (`index.html`, `experience.html`, `cases.html`, `case.html`, `news.html`) provide page shells
+- HTML entrypoints (`overview.html`, `copilot.html`, `index.html` → redirect to overview, `experience.html`, `cases.html`, `case.html`, `news.html`) provide page shells; the [deployed site](https://james-goulart.github.io/) serves the `public/` copy
 - `data.js` contains the main content model for experiences, cases, and case narratives
 - `portfolio.js` renders navigation, listing pages, case pages, and experience pages in the browser
 - `chat.js` powers the portfolio copilot experience
