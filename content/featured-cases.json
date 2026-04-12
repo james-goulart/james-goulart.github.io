@@ -1,0 +1,26 @@
+[
+  {
+    "id": "quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
+    "title": "Conversational Search, Qualification, and Trust",
+    "summary": "QuintoAndar's first serious LLM product: conversational and multimodal property search combining natural language, visual retrieval, qualification logic, and trust-sensitive UX.",
+    "why_it_matters": "This is the clearest public example of AI-native product leadership in the portfolio.",
+    "url": "case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision",
+    "theme": "AI"
+  },
+  {
+    "id": "quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
+    "title": "Search, Qualification, and Quality",
+    "summary": "A full-stack search thesis spanning qualification, UI, geographic retrieval, map behavior, and trust in results across rental and for-sale marketplaces.",
+    "why_it_matters": "This shows the non-gimmick foundations behind the later AI work.",
+    "url": "case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality",
+    "theme": "Search"
+  },
+  {
+    "id": "quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth",
+    "title": "From Marketplace Clone to Sales Engine",
+    "summary": "Operating-model redesign across agent continuity, qualification, lead allocation, and sales flow that helped drive 9x growth in signed contracts.",
+    "why_it_matters": "This is the strongest organizational and operating-model case in the portfolio.",
+    "url": "case.html#quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth",
+    "theme": "Marketplace"
+  }
+]
