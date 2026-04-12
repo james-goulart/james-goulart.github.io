@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>James Goulart - Staff-level AI Product Leader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      .phase1-shell { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+      .phase1-hero { max-width: 860px; margin: 0 0 2.25rem; }
+      .phase1-kicker { margin: 0 0 0.75rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+      .phase1-title { margin: 0; font-family: var(--font-display); font-size: clamp(2.4rem, 6vw, 4.8rem); line-height: 1.03; letter-spacing: -0.05em; }
+      .phase1-subtitle { margin: 1rem 0 0; font-size: clamp(1.05rem, 2vw, 1.35rem); color: var(--text); max-width: 760px; }
+      .phase1-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 1.5rem; }
+      .phase1-proof { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 0 0 2.5rem; }
+      .phase1-tile { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.15rem 1.15rem 1rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); }
+      .phase1-tile h3 { margin: 0 0 0.4rem; font-size: 0.98rem; line-height: 1.3; }
+      .phase1-tile p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+      .phase1-section { margin-top: 2.5rem; }
+      .phase1-section h2 { margin: 0 0 0.35rem; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: -0.03em; }
+      .phase1-section > p { margin: 0 0 1.1rem; color: var(--muted); }
+      .phase1-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+      .phase1-case { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.15rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); }
+      .phase1-case h3 { margin: 0 0 0.55rem; font-size: 1rem; line-height: 1.35; }
+      .phase1-case p { margin: 0 0 0.85rem; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+      .phase1-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1rem; }
+      .phase1-panel { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.2rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); }
+      .phase1-panel h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+      .phase1-panel p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.6; }
+      .phase1-panel ul { margin: 0.75rem 0 0; padding-left: 1.1rem; color: var(--text); }
+      .phase1-panel li { margin: 0.35rem 0; }
+      @media (max-width: 900px) {
+        .phase1-proof, .phase1-cases, .phase1-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="phase1-shell">
+      <section class="phase1-hero">
+        <p class="phase1-kicker">overview</p>
+        <h1 class="phase1-title">Staff-level AI Product Leader</h1>
+        <p class="phase1-subtitle">Search, marketplaces, retrieval, trust, and LLM-native product experiences. I build products where user intent, system quality, and business outcomes have to work together.</p>
+        <div class="phase1-actions">
+          <a class="btn btn--primary" href="cases.html">View featured case studies</a>
+          <a class="btn btn--ghost" href="index.html">Open portfolio copilot</a>
+        </div>
+      </section>
+
+      <section class="phase1-proof" aria-label="Selected proof points">
+        <article class="phase1-tile">
+          <h3>1st serious LLM product</h3>
+          <p>Built QuintoAndar's first serious LLM product in search, combining natural language, visual retrieval, qualification logic, and trust-sensitive UX.</p>
+        </article>
+        <article class="phase1-tile">
+          <h3>Search that moved contracts</h3>
+          <p>Led discovery and search improvements that increased signed contracts across rental and for-sale marketplaces.</p>
+        </article>
+        <article class="phase1-tile">
+          <h3>9x marketplace growth</h3>
+          <p>Helped drive 9x growth in for-sale signed contracts through operating-model redesign across qualification, agents, and funnel structure.</p>
+        </article>
+        <article class="phase1-tile">
+          <h3>Fintech + transaction systems</h3>
+          <p>Built financial add-ons and lending flows with meaningful adoption, better unit economics, and strong operational outcomes.</p>
+        </article>
+      </section>
+
+      <section class="phase1-section">
+        <h2>Featured case studies</h2>
+        <p>Three cases that best represent how I work across AI, search, systems, and business design.</p>
+        <div class="phase1-cases">
+          <article class="phase1-case">
+            <h3>Conversational Search, Qualification, and Trust</h3>
+            <p>QuintoAndar's first LLM product. Multimodal search combining natural language, visual retrieval, qualification rules, and confidence-aware UX.</p>
+            <a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision">Read case study</a>
+          </article>
+          <article class="phase1-case">
+            <h3>Search, Qualification, and Quality</h3>
+            <p>A full-stack search thesis across UI, filters, geography, retrieval, maps, and result trust.</p>
+            <a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality">Read case study</a>
+          </article>
+          <article class="phase1-case">
+            <h3>From Marketplace Clone to Sales Engine</h3>
+            <p>Operating-model redesign across agent continuity, qualification, lead allocation, and funnel structure. Helped drive 9x growth in signed contracts.</p>
+            <a href="case.html#quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth">Read case study</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="phase1-section">
+        <h2>What I do best</h2>
+        <div class="phase1-grid">
+          <article class="phase1-panel">
+            <h3>Operator mindset</h3>
+            <p>I work best on ambiguous, structural problems where product, engineering, data science, operations, and business design all matter at once.</p>
+            <ul>
+              <li>turning ambiguous problems into clear product direction</li>
+              <li>balancing AI capability, trust, and user control</li>
+              <li>working at the product–engineering–data boundary</li>
+              <li>making disciplined decisions about what to scale</li>
+            </ul>
+          </article>
+          <article class="phase1-panel">
+            <h3>Explore the portfolio with the copilot</h3>
+            <p>Use the portfolio copilot to jump directly into AI experience, strongest outcomes, marketplace work, fintech systems, leadership scope, or the most relevant case studies.</p>
+            <ul>
+              <li><a href="index.html">Open the copilot</a></li>
+              <li><a href="experience.html?exp=professional">Browse experiences</a></li>
+              <li><a href="news.html">See press and mentions</a></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
