@@ -51,7 +51,9 @@
 
     var aside = relatedNews.length || (meta.relatedCases && meta.relatedCases.length)
       ? '<aside id="case-related-news-desktop" class="case-aside case-aside--news" aria-label="Case links">' +
-        (relatedNews.length ? helpers.renderRelatedNewsLinks(relatedNews, "h2") : "") +
+        (relatedNews.length
+          ? helpers.renderRelatedNewsLinks(relatedNews, "h2", "case-aside__section--related-news")
+          : "") +
         helpers.renderAsideRelatedCases(meta.relatedCases || []) +
         "</aside>"
       : "";
@@ -64,12 +66,11 @@
       (exp.location
         ? '<p class="page-head__location">' + helpers.locationFlagHtml(exp) + helpers.escapeHtml(exp.location) + "</p>"
         : "") +
-      '<p class="case-header__dek">' + helpers.applyInlineMarkdown(dek) + "</p>" +
       "</header>" +
       '<div class="case-layout' + (aside ? " case-layout--with-aside" : "") + '">' +
       '<div class="case-layout__main">' +
       mobileNews +
-      helpers.renderSummaryCard(content) +
+      helpers.renderSummaryCard(content, dek) +
       helpers.renderMetrics(content.metrics || []) +
       '<div class="case-structured">' + renderSections(content) + "</div>" +
       helpers.renderRelatedCases(meta.relatedCases || []) +

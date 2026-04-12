@@ -37,9 +37,55 @@
     return null;
   }
 
+  /**
+   * Twemoji PNG filenames (72×72) — same as portfolio.js so case pages match
+   * experience pages (Windows often renders Unicode flag sequences as letters).
+   */
+  var CASE_FLAG_TWEMOJI_FILE = {
+    BR: "1f1e7-1f1f7",
+    PT: "1f1f5-1f1f9",
+    IT: "1f1ee-1f1f9",
+    RU: "1f1f7-1f1fa"
+  };
+  var CASE_TWEMOJI_FLAG_BASE =
+    "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/";
+
+  function isoCodeToFlagEmoji(code) {
+    var c = String(code || "")
+      .trim()
+      .toUpperCase();
+    if (c.length !== 2 || !/^[A-Z]{2}$/.test(c)) return "";
+    var base = 0x1f1e6;
+    return String.fromCodePoint(base + c.charCodeAt(0) - 65, base + c.charCodeAt(1) - 65);
+  }
+
   function locationFlagHtml(exp) {
-    var flag = exp && exp.locationFlag ? escapeHtml(exp.locationFlag) : "";
-    return flag ? '<span aria-hidden="true">' + flag + "</span>" : "";
+    var code =
+      exp && (exp.locationFlag || exp.navFlag)
+        ? String(exp.locationFlag || exp.navFlag)
+            .trim()
+            .toUpperCase()
+        : "";
+    if (!code) return "";
+    if (CASE_FLAG_TWEMOJI_FILE[code]) {
+      var src = CASE_TWEMOJI_FLAG_BASE + CASE_FLAG_TWEMOJI_FILE[code] + ".png";
+      return (
+        '<img class="location-flag-img" src="' +
+        escapeHtml(src) +
+        '" alt="" width="16" height="16" loading="lazy" decoding="async" />'
+      );
+    }
+    var emoji = isoCodeToFlagEmoji(code);
+    if (emoji) {
+      return (
+        '<span class="location-flag-img location-flag-img--emoji" role="img" aria-label="' +
+        escapeHtml(code) +
+        '">' +
+        emoji +
+        "</span>"
+      );
+    }
+    return '<span aria-hidden="true">' + escapeHtml(code) + "</span>";
   }
 
   function roleHtml(exp) {
@@ -154,42 +200,269 @@
       .join("");
   }
 
-  function firstSentence(text) {
-    var compact = String(text || "")
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
-      .replace(/\s+/g, " ")
+  function normalizeNewlines(t) {
+    return String(t || "")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n");
+  }
+
+  /**
+   * Numbered lists after a title ending in ":" — supports 1./2./3. separated by
+   * single OR double newlines (some cases use only \n between items).
+   */
+  function parseNumberedExecutiveBlocks(text) {
+    var raw = normalizeNewlines(text).trim();
+    if (!raw) return null;
+    var blocks = raw
+      .split(/\n\s*\n/)
+      .map(function (b) {
+        return b.trim();
+      })
+      .filter(Boolean);
+    if (blocks.length < 2) return null;
+    var head = blocks[0];
+    if (!/:\s*$/.test(head)) return null;
+    var tail = blocks.slice(1).join("\n");
+    var parts = tail
+      .split(/\n\s*(?=\d{1,2}\.\s)/)
+      .map(function (p) {
+        return p.trim();
+      })
+      .filter(Boolean);
+    var items = [];
+    for (var pi = 0; pi < parts.length; pi++) {
+      var m = parts[pi].match(/^\d{1,2}\.\s+([\s\S]+)/);
+      if (m) items.push(m[1].trim());
+    }
+    return items.length >= 2 ? items : null;
+  }
+
+  function parseUnnumberedInsightParagraphs(text) {
+    var raw = normalizeNewlines(text).trim();
+    if (!raw) return null;
+    var blocks = raw
+      .split(/\n\s*\n/)
+      .map(function (b) {
+        return b.trim();
+      })
+      .filter(Boolean);
+    if (blocks.length < 2) return null;
+    if (blocks.some(function (b) {
+      return /^\d{1,2}\.\s/.test(b);
+    })) {
+      return null;
+    }
+    return blocks;
+  }
+
+  function stripLeadingEnumeration(s) {
+    return String(s || "")
+      .replace(/^\s*\d{1,2}\.\s+/, "")
       .trim();
-    if (!compact) return "";
-    var match = compact.match(/^(.+?[.!?])(\s|$)/);
-    return (match ? match[1] : compact).trim();
+  }
+
+  /**
+   * Tight executive-summary line per insight bullet (1–2 short sentences).
+   */
+  function insightBulletExecutiveSummary(body) {
+    var b = String(body || "").trim();
+    if (!b) return "";
+    var em = b.indexOf("\u2014");
+    if (em < 0) em = b.indexOf("—");
+    if (em > 18 && em < 280) {
+      var lead = b.slice(0, em).trim();
+      if (lead.length >= 22 && lead.length <= 210) {
+        return stripLeadingEnumeration(/[.!?]$/.test(lead) ? lead : lead + ".");
+      }
+    }
+    var s1 = firstNSentencesSmart(b, 1);
+    if (s1.length > 260) {
+      var cut = s1.slice(0, 257);
+      var sp = cut.lastIndexOf(" ");
+      return stripLeadingEnumeration((sp > 170 ? cut.slice(0, sp) : cut).trim() + "\u2026");
+    }
+    if (s1.length < 88) {
+      var s2 = firstNSentencesSmart(b, 2);
+      if (s2.length <= 300) return stripLeadingEnumeration(s2);
+      var c2 = s2.slice(0, 297);
+      var sp2 = c2.lastIndexOf(" ");
+      return stripLeadingEnumeration((sp2 > 200 ? c2.slice(0, sp2) : c2).trim() + "\u2026");
+    }
+    return stripLeadingEnumeration(s1);
+  }
+
+  function isSentenceBoundary(s, i) {
+    var ch = s.charAt(i);
+    if (ch !== "." && ch !== "!" && ch !== "?") return false;
+    if (ch === ".") {
+      var j = i - 1;
+      while (j >= 0 && /\d/.test(s.charAt(j))) j--;
+      var num = s.slice(j + 1, i);
+      if (/^\d{1,2}$/.test(num)) {
+        var prev = j < 0 ? "" : s.charAt(j);
+        if (!prev || /[\s:\n(]/.test(prev)) return false;
+      }
+      var windowStart = Math.max(0, i - 10);
+      var beforeDot = s.slice(windowStart, i + 1).toLowerCase();
+      if (/\be\.g\.$/.test(beforeDot) || /\bi\.e\.$/.test(beforeDot)) return false;
+    }
+    return true;
+  }
+
+  function firstSentenceSmart(text) {
+    var s = String(text || "").trim();
+    if (!s) return "";
+    var i = 0;
+    while (i < s.length) {
+      var ch = s.charAt(i);
+      if ((ch === "." || ch === "!" || ch === "?") && isSentenceBoundary(s, i)) {
+        return s.slice(0, i + 1).trim();
+      }
+      i++;
+    }
+    return s;
+  }
+
+  /** Up to maxN sentences per segment (same boundary rules as firstSentenceSmart). */
+  function firstNSentencesSmart(text, maxN) {
+    var n = Math.max(1, Number(maxN) > 0 ? Number(maxN) : 2);
+    var s = String(text || "").trim();
+    if (!s) return "";
+    var parts = [];
+    var segStart = 0;
+    var i = 0;
+    while (i < s.length && parts.length < n) {
+      var ch = s.charAt(i);
+      if ((ch === "." || ch === "!" || ch === "?") && isSentenceBoundary(s, i)) {
+        parts.push(s.slice(segStart, i + 1).trim());
+        segStart = i + 1;
+        while (segStart < s.length && /\s/.test(s.charAt(segStart))) segStart++;
+        i = segStart;
+        continue;
+      }
+      i++;
+    }
+    if (parts.length < n && segStart < s.length) {
+      var tail = s.slice(segStart).trim();
+      if (tail) parts.push(tail);
+    }
+    return parts.join(" ");
+  }
+
+  function summaryFieldValue(text, fieldLabel) {
+    var numbered = parseNumberedExecutiveBlocks(text);
+    if (numbered && numbered.length) {
+      var bodies = numbered;
+      if (fieldLabel === "Insight") {
+        bodies = numbered.map(function (body) {
+          return insightBulletExecutiveSummary(body);
+        });
+        return {
+          html:
+            '<div class="case-summary-insights">' +
+            bodies
+              .map(function (body) {
+                return (
+                  '<div class="case-summary-insights__item">' +
+                  applyInlineMarkdown(body) +
+                  "</div>"
+                );
+              })
+              .join("") +
+            "</div>"
+        };
+      }
+      return {
+        html:
+          '<ul class="case-summary-points">' +
+          bodies
+            .map(function (body) {
+              return "<li>" + applyInlineMarkdown(body) + "</li>";
+            })
+            .join("") +
+          "</ul>"
+      };
+    }
+    if (fieldLabel === "Insight") {
+      var paras = parseUnnumberedInsightParagraphs(text);
+      if (paras && paras.length >= 2) {
+        var pb = paras.map(function (p) {
+          return insightBulletExecutiveSummary(p);
+        });
+        return {
+          html:
+            '<div class="case-summary-insights">' +
+            pb
+              .map(function (body) {
+                return (
+                  '<div class="case-summary-insights__item">' +
+                  applyInlineMarkdown(body) +
+                  "</div>"
+                );
+              })
+              .join("") +
+            "</div>"
+        };
+      }
+      var ib = insightBulletExecutiveSummary(text);
+      return ib ? { text: ib } : null;
+    }
+    var t = firstSentenceSmart(text);
+    return t ? { text: t } : null;
   }
 
   function buildSummaryItems(content) {
-    return [
-      { label: "Problem", text: firstSentence(content.problem) },
-      { label: "Insight", text: firstSentence(content.insight) },
-      { label: "Move", text: firstSentence(content.solution) },
-      { label: "Result", text: firstSentence(content.results) }
-    ].filter(function (item) { return item.text; });
+    var rows = [
+      { label: "Problem", value: summaryFieldValue(content.problem, "Problem") },
+      { label: "Insight", value: summaryFieldValue(content.insight, "Insight") },
+      { label: "Move", value: summaryFieldValue(content.solution, "Move") },
+      { label: "Result", value: summaryFieldValue(content.results, "Result") }
+    ];
+    return rows
+      .filter(function (r) {
+        return r.value;
+      })
+      .map(function (r) {
+        var v = r.value;
+        if (v.html) return { label: r.label, html: v.html };
+        return { label: r.label, text: v.text };
+      });
   }
 
-  function renderSummaryCard(content) {
+  function renderSummaryCard(content, dek) {
     var items = buildSummaryItems(content);
-    if (!items.length) return "";
+    var dekHtml = dek
+      ? '<div class="case-summary-card__dek">' + applyInlineMarkdown(String(dek).trim()) + "</div>"
+      : "";
+    if (!items.length && !dekHtml) return "";
     return (
       '<section class="case-summary-card" aria-labelledby="case-summary-heading">' +
       '<div class="case-summary-card__inner">' +
       '<h2 id="case-summary-heading" class="case-summary-card__label">Executive summary</h2>' +
-      '<ul class="case-summary-list">' +
-      items.map(function (item) {
-        return (
-          "<li>" +
-          '<span class="case-summary-list__label">' + escapeHtml(item.label) + "</span>" +
-          '<span class="case-summary-list__text">' + applyInlineMarkdown(item.text) + "</span>" +
-          "</li>"
-        );
-      }).join("") +
-      "</ul></div></section>"
+      dekHtml +
+      (items.length
+        ? '<ul class="case-summary-list">' +
+          items
+            .map(function (item) {
+              var body =
+                item.html != null
+                  ? item.html
+                  : applyInlineMarkdown(item.text);
+              return (
+                "<li>" +
+                '<span class="case-summary-list__label">' +
+                escapeHtml(item.label) +
+                "</span>" +
+                '<span class="case-summary-list__text">' +
+                body +
+                "</span>" +
+                "</li>"
+              );
+            })
+            .join("") +
+          "</ul>"
+        : "") +
+      "</div></section>"
     );
   }
 
@@ -233,11 +506,12 @@
     }
   }
 
-  function renderRelatedNewsLinks(urls, titleTag) {
+  function renderRelatedNewsLinks(urls, titleTag, sectionClassExtra) {
     if (!urls.length) return "";
     var headingTag = titleTag || "h2";
+    var extra = sectionClassExtra ? " " + sectionClassExtra : "";
     return (
-      '<section class="case-aside__section">' +
+      '<section class="case-aside__section' + extra + '">' +
       "<" + headingTag + ">Related news</" + headingTag + ">" +
       '<ul class="case-aside__links">' +
       urls.map(function (url) {
