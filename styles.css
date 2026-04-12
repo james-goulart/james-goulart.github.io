@@ -331,6 +331,12 @@ a:hover {
   color: var(--text);
 }
 
+.nav-brand.is-active {
+  font-weight: 800;
+  border-bottom: 2px solid var(--text);
+  padding-bottom: 0.15rem;
+}
+
 /* Brand link used in portfolio.js nav */
 .brand {
   justify-self: start;
