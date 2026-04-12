@@ -1,4 +1,4 @@
-# James Goulart — Staff-level AI Product Portfolio
+# James Goulart — AI Product Leader
 
 This repository powers my public portfolio site.
 
