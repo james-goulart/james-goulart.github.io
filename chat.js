@@ -26,8 +26,19 @@
   var CHECK_ICON_SVG =
     '<svg class="chat-copy-btn__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
 
-  var EMPTY_STATE_TITLE = "About Me";
-  var EMPTY_STATE_SUBTITLE = "Product leader with 10 years of experience on marketplaces, search, AI, and platforms. Led cross-functional initiatives across proptech and fintech, turning ambiguous structural problems into clearer product direction, stronger discovery, and better business outcomes.<br><br>Use the copilot below to explore my experiences.";
+  var COPILOT_AI_ICON_SVG =
+    '<svg class="copilot-ai-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">' +
+    '<path class="copilot-ai-icon__bubble" d="M7 10a2.5 2.5 0 0 1 2.5-2.5h5A2.5 2.5 0 0 1 17 10v3a2.5 2.5 0 0 1-2.5 2.5h-1.8l-2.2 2.1V15.5H9.5A2.5 2.5 0 0 1 7 13v-3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/>' +
+    '<g class="copilot-ai-icon__sparkles" fill="currentColor">' +
+    '<circle class="copilot-ai-icon__pulse" cx="18.35" cy="5.85" r="1.55"/>' +
+    '<circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay" cx="21.4" cy="10.15" r="1.05"/>' +
+    '<circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay-b" cx="19.15" cy="12.85" r="0.72"/>' +
+    "</g>" +
+    "</svg>";
+
+  var EMPTY_STATE_TITLE = "Portfolio copilot";
+  var EMPTY_STATE_SUBTITLE =
+    "Ask about AI and search work, cases, outcomes, or leadership. An assistant grounded in this portfolio answers — not a generic web search.";
 
   var CHAT_WORKER_ORIGIN =
     "https://james-portfolio-chat.james-portfolio-chat.workers.dev";
@@ -235,6 +246,7 @@
   var inputEl = null;
   var sendBtn = null;
   var suggestionsEl = null;
+  var suggestionsGridEl = null;
   var clearBtn = null;
   var initOpts = {};
 
@@ -360,7 +372,7 @@
   }
 
   function wireSuggestions(container) {
-    var target = container || suggestionsEl;
+    var target = container || suggestionsGridEl;
     if (!target) return;
     target.innerHTML = "";
     SUGGESTED_QUESTIONS.forEach(function (q) {
@@ -382,10 +394,33 @@
 
   window.wireChatSuggestionsToContainer = wireSuggestionsToContainer;
 
+  function buildSuggestionsBlock() {
+    var grid = document.createElement("div");
+    grid.className = "chat-suggestions";
+    wireSuggestions(grid);
+    var wrap = document.createElement("div");
+    wrap.className = "chat-suggestions-wrap";
+    var label = document.createElement("p");
+    label.className = "chat-suggestions__label";
+    label.textContent = "Try asking";
+    wrap.appendChild(label);
+    wrap.appendChild(grid);
+    suggestionsGridEl = grid;
+    suggestionsEl = wrap;
+    return wrap;
+  }
+
   function createEmptyState() {
     var el = document.createElement("section");
     el.className = "chat-empty-state";
+    var iconWrap = COPILOT_AI_ICON_SVG.replace(
+      'class="copilot-ai-icon"',
+      'class="copilot-ai-icon copilot-ai-icon--empty"'
+    );
     el.innerHTML =
+      '<div class="chat-empty-state__mark">' +
+      iconWrap +
+      "</div>" +
       '<h2 class="chat-empty-state__title">' +
       escapeHtml(EMPTY_STATE_TITLE) +
       "</h2>" +
@@ -401,9 +436,7 @@
       sessionStorage.removeItem(STORAGE_KEY);
     } catch (e) {}
     messagesEl.innerHTML = "";
-    suggestionsEl = document.createElement("div");
-    suggestionsEl.className = "chat-suggestions";
-    wireSuggestions();
+    buildSuggestionsBlock();
     if (!initOpts.noEmptyState) {
       emptyStateEl = createEmptyState();
       messagesEl.appendChild(emptyStateEl);
@@ -452,8 +485,14 @@
     var botWrap = appendMessage("assistant", "");
     var bodyEl = botWrap.querySelector(".chat-bubble__body");
     if (bodyEl) {
+      var typingIcon = COPILOT_AI_ICON_SVG.replace(
+        'class="copilot-ai-icon"',
+        'class="copilot-ai-icon copilot-ai-icon--typing"'
+      );
       bodyEl.innerHTML =
-        '<span class="chat-typing">Analyzing CV and cases\u2026</span>';
+        '<span class="chat-typing">' +
+        typingIcon +
+        "<span>Analyzing CV and cases\u2026</span></span>";
     }
 
     var accumulated = "";
@@ -631,9 +670,7 @@
     clearBtnContainer.className = "chat-clear-container";
     clearBtnContainer.appendChild(clearBtn);
 
-    suggestionsEl = document.createElement("div");
-    suggestionsEl.className = "chat-suggestions";
-    wireSuggestions();
+    buildSuggestionsBlock();
 
     var stored = loadStoredMessages();
     if (stored && stored.length > 0) {
@@ -681,7 +718,8 @@
     inputEl = document.createElement("input");
     inputEl.type = "text";
     inputEl.className = "chat-input";
-    inputEl.placeholder = "Ask about fintech, leadership, case studies, or measurable wins\u2026";
+    inputEl.placeholder =
+      "Try: AI experience in search, strongest outcomes, fintech, leadership\u2026";
     inputEl.autocomplete = "off";
     inputEl.maxLength = 500;
 

@@ -535,9 +535,9 @@ const Portfolio = (function () {
       "</a>" +
       '<div class="nav-center-wrap">' +
       '<ul id="nav-menu" class="nav-menu">' +
-      '<li><a href="copilot.html"' +
-      (active === "copilot" ? ' class="is-active"' : "") +
-      ">copilot</a></li>" +
+      '<li><a href="copilot.html" class="nav-copilot' +
+      (active === "copilot" ? " is-active" : "") +
+      '"><svg class="copilot-ai-icon copilot-ai-icon--nav" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path class="copilot-ai-icon__bubble" d="M7 10a2.5 2.5 0 0 1 2.5-2.5h5A2.5 2.5 0 0 1 17 10v3a2.5 2.5 0 0 1-2.5 2.5h-1.8l-2.2 2.1V15.5H9.5A2.5 2.5 0 0 1 7 13v-3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><g class="copilot-ai-icon__sparkles" fill="currentColor"><circle class="copilot-ai-icon__pulse" cx="18.35" cy="5.85" r="1.55"/><circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay" cx="21.4" cy="10.15" r="1.05"/><circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay-b" cx="19.15" cy="12.85" r="0.72"/></g></svg> copilot</a></li>' +
       '<li class="nav-has-sub nav-has-sub--exp">' +
       '<a href="experience.html" class="nav-label' +
       (expSectionActive ? " nav-label--active" : "") +
