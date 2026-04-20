@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)seena-event-ozone-intro.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intro to Ozone Therapy — Seena Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--sage:#5a7a62;--sage-deep:#3d5843;--sage-pale:#edf2ee;--cream:#f7f4ef;--cream-dark:#ede9e1;--stone:#c8bfb0;--text:#2a2520;--text-mid:#6b6259;--text-soft:#9b9088;--white:#ffffff}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text)}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--sage-deep);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;color:#fff;letter-spacing:.04em;text-decoration:none}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-cta{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;padding:9px 22px;border-radius:40px;font-size:11.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;text-decoration:none}
+.event-hero{background:linear-gradient(160deg,#2e4535 0%,#3d5843 60%,#2e4535 100%);padding:140px 56px 72px;position:relative;overflow:hidden}
+.event-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to top,var(--cream),transparent)}
+.hero-inner{max-width:800px;position:relative;z-index:1}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);font-size:12px;text-decoration:none;letter-spacing:.06em;text-transform:uppercase;margin-bottom:32px;transition:color .2s}
+.back-link:hover{color:rgba(255,255,255,.8)}
+.back-link svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5}
+.event-tag{font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(125,170,134,.9);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.event-tag::before{content:'';width:16px;height:1px;background:rgba(125,170,134,.7)}
+h1{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;line-height:1.1;color:#fff;margin-bottom:24px}
+h1 em{font-style:italic;color:rgba(255,255,255,.8)}
+.event-meta-row{display:flex;flex-wrap:wrap;gap:20px}
+.meta-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:30px;padding:8px 14px;font-size:12px;color:rgba(255,255,255,.75)}
+.meta-pill svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;flex-shrink:0}
+main{max-width:1100px;margin:0 auto;padding:56px 48px 96px;display:grid;grid-template-columns:1fr 340px;gap:64px;align-items:start}
+.event-content h2{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:400;color:var(--text);margin:36px 0 14px}
+.event-content p{font-size:15px;font-weight:300;line-height:1.8;color:var(--text-mid);margin-bottom:16px}
+.event-content ul{margin:16px 0 16px 0;display:flex;flex-direction:column;gap:10px}
+.event-content li{display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:300;color:var(--text-mid);line-height:1.6}
+.event-content li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--sage);flex-shrink:0;margin-top:8px}
+.speaker-card{background:var(--white);border:1px solid var(--cream-dark);border-radius:14px;padding:24px;margin-top:36px}
+.speaker-avatar{width:52px;height:52px;border-radius:50%;background:var(--sage-deep);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;color:#fff;margin-bottom:14px}
+.speaker-name{font-size:15px;font-weight:500;color:var(--text);margin-bottom:3px}
+.speaker-role{font-size:12px;font-weight:300;color:var(--text-soft)}
+.sidebar{position:sticky;top:88px}
+.booking-card{background:var(--white);border:1px solid var(--cream-dark);border-radius:16px;padding:32px;margin-bottom:20px}
+.booking-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;color:var(--text);margin-bottom:20px}
+.booking-detail{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;font-size:13px;color:var(--text-mid)}
+.booking-detail svg{width:15px;height:15px;stroke:var(--sage);fill:none;stroke-width:1.5;flex-shrink:0;margin-top:1px}
+.booking-detail strong{color:var(--text);font-weight:500}
+.spots-bar{background:var(--sage-pale);border-radius:6px;height:6px;margin:20px 0 6px;overflow:hidden}
+.spots-fill{width:60%;height:100%;background:var(--sage);border-radius:6px}
+.spots-label{font-size:11px;color:var(--text-soft);margin-bottom:20px}
+.book-btn{display:block;width:100%;text-align:center;background:var(--sage-deep);color:#fff;padding:14px 24px;border-radius:40px;font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;margin-bottom:12px}
+.wa-btn{display:block;width:100%;text-align:center;border:1px solid var(--cream-dark);color:var(--text-mid);padding:12px 24px;border-radius:40px;font-size:12px;text-decoration:none}
+.share-card{background:var(--sage-pale);border-radius:12px;padding:20px 24px}
+.share-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin-bottom:12px}
+.share-btn{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--text-mid);text-decoration:none;border:1px solid var(--stone);background:var(--white);padding:7px 14px;border-radius:30px;transition:border-color .2s}
+.share-btn:hover{border-color:var(--sage)}
+footer{background:var(--sage-deep);padding:40px 48px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'Cormorant Garamond',serif;font-size:20px;color:#fff}
+.footer-links{display:flex;gap:24px}.footer-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+.footer-copy{font-size:11px;color:rgba(255,255,255,.3)}
+@media(max-width:900px){main{grid-template-columns:1fr;gap:40px}.sidebar{position:static}nav,main,footer{padding-left:20px;padding-right:20px}.event-hero{padding:120px 20px 56px}h1{font-size:38px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Seena</a>
+  <ul class="nav-links"><li><a href="seena-services.html">Services</a></li><li><a href="seena-specialists.html">Specialists</a></li><li><a href="seena-learn.html">Learn</a></li><li><a href="seena-shop.html">Shop</a></li></ul>
+  <a href="https://wa.me/351924353219" class="nav-cta">Book Appointment</a>
+</nav>
+
+<section class="event-hero">
+  <div class="hero-inner">
+    <a href="seena-learn.html" class="back-link"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg>Back to Learn</a>
+    <div class="event-tag">Workshop · In-person · Free</div>
+    <h1>Introduction to Ozone Therapy — <em>What It Is and Who It's For</em></h1>
+    <div class="event-meta-row">
+      <span class="meta-pill"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>Thursday, 14 May 2026</span>
+      <span class="meta-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>18:30 – 20:00</span>
+      <span class="meta-pill"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>Seena Centre, Parque das Nações</span>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="event-content">
+    <p>Join us for an accessible, jargon-free introduction to ozone therapy — one of the most versatile and evidence-backed integrative treatments available today. This session is designed for anyone curious about ozone therapy who wants honest, medical-grade information before deciding if it's right for them.</p>
+
+    <h2>What you'll learn</h2>
+    <ul>
+      <li>What medical ozone therapy actually is — and what it isn't</li>
+      <li>How ozone works in the body: oxygen delivery, inflammation, and immune modulation</li>
+      <li>The different administration methods (IV, rectal, intramuscular, local) and when each is used</li>
+      <li>Which conditions respond best to ozone therapy</li>
+      <li>Safety, contraindications, and what to expect from a session at Seena</li>
+      <li>How ozone therapy fits into a broader integrative care plan</li>
+    </ul>
+
+    <h2>Who is this for?</h2>
+    <p>This event is for anyone who has heard about ozone therapy and wants to understand it properly before booking — or anyone with a chronic condition looking to understand their options. No prior knowledge required. The session will be in English with Q&amp;A.</p>
+
+    <h2>Format</h2>
+    <p>90-minute session with a 20-minute presentation, a clinical demonstration, and an extended Q&amp;A. You're encouraged to bring your medical history or specific questions. Light refreshments provided.</p>
+
+    <h2>Presented by</h2>
+    <div class="speaker-card">
+      <div class="speaker-avatar">V</div>
+      <div class="speaker-name">Dr. Vadim Fasiy</div>
+      <div class="speaker-role">General &amp; Family Medicine · Medical Acupuncture Specialist · Seena Integrative Health Centre</div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="booking-card">
+      <div class="booking-title">Reserve your spot</div>
+      <div class="booking-detail"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg><div><strong>Thursday, 14 May 2026</strong><br>18:30 – 20:00</div></div>
+      <div class="booking-detail"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path><circle cx="12" cy="9" r="2.5"></circle></svg><div><strong>Seena Centre</strong><br>Rua das Musas 13A, Parque das Nações</div></div>
+      <div class="booking-detail"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg><div><strong>Limited to 15 people</strong></div></div>
+      <div class="spots-bar"><div class="spots-fill"></div></div>
+      <div class="spots-label">9 spots remaining</div>
+      <a href="https://wa.me/351924353219?text=Hi!%20I%27d%20like%20to%20reserve%20a%20spot%20for%20the%20Ozone%20Therapy%20event%20on%2014%20May." target="_blank" class="book-btn">Reserve via WhatsApp</a>
+      <a href="mailto:info@seenahealth.com?subject=Ozone%20Therapy%20Event%20-%20May%2014" class="wa-btn">Reserve via email</a>
+    </div>
+    <div class="share-card">
+      <div class="share-label">Share this event</div>
+      <a href="seena-event-ozone-intro.html#" class="share-btn">Copy link</a>
+    </div>
+  </div>
+</main>
+
+<footer><div class="footer-inner">
+  <span class="footer-logo">Seena</span>
+  <div class="footer-links"><a href="seena-services.html">Services</a><a href="seena-specialists.html">Specialists</a><a href="seena-learn.html">Learn</a><a href="seena-shop.html">Shop</a></div>
+  <span class="footer-copy">© 2026 Seena Integrative Health Centre</span>
+</div></footer>
+
+
+</body></html>
