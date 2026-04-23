@@ -1,133 +1,160 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>James Goulart - AI Product Leader</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css" />
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-    <style>
-      .phase1-shell { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
-      .phase1-hero { max-width: 860px; margin: 0 0 2.25rem; }
-      .phase1-kicker { margin: 0 0 0.75rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-      .phase1-title { margin: 0; font-family: var(--font-display); font-size: clamp(2.4rem, 6vw, 4.8rem); line-height: 1.03; letter-spacing: -0.05em; }
-      .phase1-subtitle { margin: 1rem 0 0; font-size: clamp(1.05rem, 2vw, 1.35rem); color: var(--text); max-width: 760px; }
-      .phase1-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 1.5rem; }
-      .phase1-proof { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 0 0 2.5rem; }
-      .phase1-tile { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.15rem 1.15rem 1rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); }
-      .phase1-tile h3 { margin: 0 0 0.4rem; font-size: 0.98rem; line-height: 1.3; }
-      .phase1-tile p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
-      .phase1-section { margin-top: 2.5rem; }
-      .phase1-section h2 { margin: 0 0 0.35rem; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: -0.03em; }
-      .phase1-section > p { margin: 0 0 1.1rem; color: var(--muted); }
-      .phase1-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-      .phase1-case { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.15rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); font-size: 1rem; }
-      .phase1-case__logo { display: block; height: 1.35em; width: auto; max-width: 100%; object-fit: contain; object-position: left center; margin: 0 0 0.65rem; }
-      .phase1-case h3 { margin: 0 0 0.55rem; font-size: 1em; line-height: 1.35; }
-      .phase1-case p { margin: 0 0 0.85rem; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
-      .phase1-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1rem; }
-      .phase1-panel { border: 1px solid var(--border-light); border-radius: 16px; background: var(--bg); padding: 1.2rem; box-shadow: 0 1px 3px rgba(42,38,34,0.08); }
-      .phase1-panel h3 { margin: 0 0 0.5rem; font-size: 1rem; }
-      .phase1-panel p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.6; }
-      .phase1-panel ul { margin: 0.75rem 0 0; padding-left: 1.1rem; color: var(--text); }
-      .phase1-panel li { margin: 0.35rem 0; }
-      @media (max-width: 900px) {
-        .phase1-proof, .phase1-cases, .phase1-grid { grid-template-columns: 1fr; }
-      }
-    </style>
-  </head>
-  <body>
-    <header id="site-nav" class="site-nav" aria-label="Primary"></header>
-    <main class="phase1-shell">
-      <section class="phase1-hero">
-        <p class="phase1-kicker">overview</p>
-        <h1 class="phase1-title">AI Product Leader</h1>
-        <p class="phase1-subtitle">Search, marketplaces, retrieval, trust, and LLM-native product experiences. I build products where user intent, system quality, and business outcomes have to work together.</p>
-        <div class="phase1-actions">
-          <a class="btn btn--primary btn--ai-copilot" href="copilot.html" aria-label="Open the AI portfolio copilot"><svg class="copilot-ai-icon copilot-ai-icon--hero" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path class="copilot-ai-icon__bubble" d="M7 10a2.5 2.5 0 0 1 2.5-2.5h5A2.5 2.5 0 0 1 17 10v3a2.5 2.5 0 0 1-2.5 2.5h-1.8l-2.2 2.1V15.5H9.5A2.5 2.5 0 0 1 7 13v-3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><g class="copilot-ai-icon__sparkles" fill="currentColor"><circle class="copilot-ai-icon__pulse" cx="18.35" cy="5.85" r="1.55"/><circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay" cx="21.4" cy="10.15" r="1.05"/><circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay-b" cx="19.15" cy="12.85" r="0.72"/></g></svg> Chat with the AI copilot</a>
-          <a class="btn btn--ghost" href="cases.html">View featured case studies</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>James Goulart — AI Product Leader</title>
+  <meta name="description" content="AI product leader focused on search, marketplaces, retrieval, trust, and systems that turn technical capability into business results." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+  <style>
+    :root{--bg:#f7f5f1;--card:rgba(255,255,255,.78);--text:#161616;--muted:#5e5a55;--line:rgba(18,18,18,.1);--accent:#3257ff;--shadow:0 20px 60px rgba(17,17,17,.07);--serif:"Newsreader",Georgia,serif;--sans:"Inter",system-ui,sans-serif}
+    body{margin:0;font-family:var(--sans);color:var(--text);background:linear-gradient(to bottom,rgba(255,255,255,.55),rgba(255,255,255,.08)),radial-gradient(circle at top left,rgba(50,87,255,.08),transparent 28%),radial-gradient(circle at 85% 10%,rgba(0,0,0,.03),transparent 24%),var(--bg);line-height:1.5}
+    body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(17,17,17,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(17,17,17,.03) 1px,transparent 1px);background-size:40px 40px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.45),transparent 75%);pointer-events:none}
+    .site-nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(18px);background:rgba(247,245,241,.62);border-bottom:1px solid rgba(18,18,18,.05)}
+    .site-nav .nav-inner{max-width:1240px;margin:0 auto;padding:0 20px}.nav-brand.is-active{font-weight:800;border-bottom:2px solid var(--text);padding-bottom:.15rem}
+    .wrap{position:relative;z-index:1;width:min(calc(100% - 40px),1180px);margin:0 auto;padding:72px 0 60px}
+    .surface{background:var(--card);border:1px solid rgba(18,18,18,.08);backdrop-filter:blur(18px);box-shadow:var(--shadow);border-radius:28px}
+    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:24px}.copy,.side,.work-card,.about,.footer{padding:28px}
+    .pill{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.65);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 8px rgba(50,87,255,.08)}
+    .eyebrow{display:flex;justify-content:space-between;gap:16px;align-items:center;font-size:13px;color:var(--muted)} .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    h1{margin:24px 0 18px;font-size:clamp(3.1rem,7vw,5.6rem);line-height:.95;letter-spacing:-.055em;max-width:11ch} h1 span{font-family:var(--serif);font-style:italic;font-weight:500}
+    .lede{max-width:62ch;font-size:19px;color:#2c2a27;line-height:1.7;margin:0 0 24px}
+    .actions{display:flex;gap:14px;flex-wrap:wrap}.button{display:inline-flex;align-items:center;justify-content:center;padding:14px 18px;border-radius:999px;font-weight:600;text-decoration:none}.primary{background:var(--text);color:#fff!important}.secondary{background:rgba(255,255,255,.85);color:var(--text)!important;border:1px solid var(--line)}
+    .proof{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}.proof div{padding:16px;border-radius:18px;background:rgba(255,255,255,.62);border:1px solid rgba(18,18,18,.08)} .proof strong{display:block;font-size:22px;margin-bottom:4px}
+    .side-top{display:flex;justify-content:space-between;gap:12px;align-items:start;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}.tag{padding:8px 10px;border-radius:999px;border:1px solid rgba(18,18,18,.08);background:rgba(255,255,255,.85);color:var(--text);font-size:12px;text-transform:none;letter-spacing:0}
+    .system{margin:18px 0;padding:18px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.72));border:1px solid rgba(18,18,18,.07);display:grid;gap:12px}.system b{display:block;font-size:15px}
+    .decision{padding:18px;border-radius:22px;background:#121212;color:#fff}.decision small{display:flex;justify-content:space-between;opacity:.72;text-transform:uppercase;letter-spacing:.12em;font-size:12px}.decision h3{margin:12px 0 10px;font-size:22px;line-height:1.25}.decision p{margin:0 0 14px}
+    section{padding-top:28px}.head{display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:start;margin-bottom:22px}.head h2,.footer h2{margin:0 0 10px;font-size:clamp(2rem,4vw,3.1rem);line-height:1;letter-spacing:-.04em}.head p,.footer p{margin:0;color:var(--muted);max-width:60ch;font-size:17px;line-height:1.7}.label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+    .work{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.work-card,.about{display:grid;gap:16px}.work-card h3{margin:0;font-size:24px;line-height:1.12}.work-card p{margin:0;color:var(--muted)}
+    .logo{height:18px;width:auto;max-width:100%;object-fit:contain}.mini{padding:14px;border-radius:18px;border:1px solid rgba(18,18,18,.08);background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7));display:grid;gap:10px}.row{display:grid;grid-template-columns:86px 1fr auto;gap:10px;align-items:center;font-size:12px;color:var(--muted)}.bar{height:8px;border-radius:999px;background:rgba(18,18,18,.07);overflow:hidden}.bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,rgba(50,87,255,.95),rgba(50,87,255,.45))}
+    .foot{display:flex;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px dashed rgba(18,18,18,.1);color:var(--muted);font-size:13px;margin-top:auto}
+    .about-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.list{list-style:none;margin:0;padding:0;display:grid;gap:12px}.list li{position:relative;padding-left:16px;color:var(--muted)}.list li:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);position:absolute;left:0;top:.75em;transform:translateY(-50%)}
+    .footer{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:end}.contact{padding:20px;border-radius:24px;background:#121212;color:#fff;display:grid;gap:12px}.contact small{text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.62)}.contact a{color:rgba(255,255,255,.92)!important;text-decoration:none}.credits{margin-top:14px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+    .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}.reveal.show{opacity:1;transform:translateY(0)}
+    @media (max-width:1080px){.hero,.footer,.head{grid-template-columns:1fr}.work,.about-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:720px){.wrap{width:min(calc(100% - 24px),1180px);padding-top:28px}.proof,.work,.about-grid{grid-template-columns:1fr}.actions{flex-direction:column;align-items:stretch}.button{width:100%}.eyebrow,.side-top,.foot{flex-direction:column;align-items:flex-start}.row{grid-template-columns:1fr}}
+    @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+  </style>
+</head>
+<body>
+  <header id="site-nav" class="site-nav" aria-label="Primary"></header>
+  <main class="wrap">
+    <section class="hero">
+      <article class="surface copy reveal">
+        <div>
+          <div class="eyebrow">
+            <div class="pill"><span class="dot"></span> ai product leadership · search, retrieval, marketplaces, trust</div>
+            <span class="mono">lisbon / remote / europe + latam</span>
+          </div>
+          <h1>I build <span>AI and search products</span> where intelligence has to earn trust.</h1>
+          <p class="lede">I’m a product leader across proptech and fintech. My best work sits where user intent, ranking quality, operating design, and measurable business outcomes all have to work as one system.</p>
+          <div class="actions">
+            <a class="button primary" href="cases.html">View featured case studies</a>
+            <a class="button secondary" href="experience.html?exp=professional">Browse experiences</a>
+          </div>
         </div>
-        <p class="phase1-ai-note">Powered by an AI assistant — answers draw from this portfolio.</p>
-      </section>
-
-      <section class="phase1-proof" aria-label="Selected proof points">
-        <article class="phase1-tile">
-          <h3>1st serious LLM product</h3>
-          <p>Built QuintoAndar's first serious LLM product in search, combining natural language, visual retrieval, qualification logic, and trust-sensitive UX.</p>
-        </article>
-        <article class="phase1-tile">
-          <h3>Search that moved contracts</h3>
-          <p>Led discovery and search improvements that increased signed contracts across rental and for-sale marketplaces.</p>
-        </article>
-        <article class="phase1-tile">
-          <h3>9x marketplace growth</h3>
-          <p>Helped drive 9x growth in for-sale signed contracts through operating-model redesign across qualification, agents, and funnel structure.</p>
-        </article>
-        <article class="phase1-tile">
-          <h3>Fintech + transaction systems</h3>
-          <p>Built financial add-ons and lending flows with meaningful adoption, better unit economics, and strong operational outcomes.</p>
-        </article>
-      </section>
-
-      <section class="phase1-section">
-        <h2>Featured case studies</h2>
-        <p>Three cases that best represent how I work across AI, search, systems, and business design.</p>
-        <div class="phase1-cases">
-          <article class="phase1-case">
-            <img class="phase1-case__logo" src="./assets/images/logos/quintoandar-logo.svg" width="184" height="25" alt="QuintoAndar" decoding="async" />
-            <h3>Conversational Search, Qualification, and Trust</h3>
-            <p>QuintoAndar's first LLM product. Multimodal search combining natural language, visual retrieval, qualification rules, and confidence-aware UX.</p>
-            <a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision">Read case study</a>
-          </article>
-          <article class="phase1-case">
-            <img class="phase1-case__logo" src="./assets/images/logos/quintoandar-logo.svg" width="184" height="25" alt="QuintoAndar" decoding="async" />
-            <h3>Search, Qualification, and Quality</h3>
-            <p>A full-stack search thesis across UI, filters, geography, retrieval, maps, and result trust.</p>
-            <a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality">Read case study</a>
-          </article>
-          <article class="phase1-case">
-            <img class="phase1-case__logo" src="./assets/images/logos/quintoandar-logo.svg" width="184" height="25" alt="QuintoAndar" decoding="async" />
-            <h3>From Marketplace Clone to Sales Engine</h3>
-            <p>Operating-model redesign across agent continuity, qualification, lead allocation, and funnel structure. Helped drive 9x growth in signed contracts.</p>
-            <a href="case.html#quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth">Read case study</a>
-          </article>
+        <div class="proof">
+          <div><strong>1st serious LLM product</strong><span>Built QuintoAndar’s first serious LLM product in search, combining natural language, visual retrieval, qualification logic, and trust-sensitive UX.</span></div>
+          <div><strong>9x for-sale growth</strong><span>Helped drive 9x growth in signed contracts through marketplace and operating-model redesign across qualification, agents, and funnel structure.</span></div>
+          <div><strong>Fintech + transaction systems</strong><span>Built financial add-ons and lending flows with meaningful adoption, stronger unit economics, and better operational outcomes.</span></div>
         </div>
-      </section>
-
-      <section class="phase1-section">
-        <h2>What I do best</h2>
-        <div class="phase1-grid">
-          <article class="phase1-panel">
-            <h3>Operator mindset</h3>
-            <p>I work best on ambiguous, structural problems where product, engineering, data science, operations, and business design all matter at once.</p>
-            <ul>
-              <li>turning ambiguous problems into clear product direction</li>
-              <li>balancing AI capability, trust, and user control</li>
-              <li>working at the product–engineering–data boundary</li>
-              <li>making disciplined decisions about what to scale</li>
-            </ul>
-          </article>
-          <article class="phase1-panel">
-            <h3>Explore the portfolio with the copilot</h3>
-            <p>Use the portfolio copilot to jump directly into AI experience, strongest outcomes, marketplace work, fintech systems, leadership scope, or the most relevant case studies.</p>
-            <ul>
-              <li><a class="phase1-copilot-link" href="copilot.html"><svg class="copilot-ai-icon copilot-ai-icon--inline" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path class="copilot-ai-icon__bubble" d="M7 10a2.5 2.5 0 0 1 2.5-2.5h5A2.5 2.5 0 0 1 17 10v3a2.5 2.5 0 0 1-2.5 2.5h-1.8l-2.2 2.1V15.5H9.5A2.5 2.5 0 0 1 7 13v-3Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><g class="copilot-ai-icon__sparkles" fill="currentColor"><circle class="copilot-ai-icon__pulse" cx="18.35" cy="5.85" r="1.55"/><circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay" cx="21.4" cy="10.15" r="1.05"/><circle class="copilot-ai-icon__pulse copilot-ai-icon__pulse--delay-b" cx="19.15" cy="12.85" r="0.72"/></g></svg> Open the AI copilot</a></li>
-              <li><a href="experience.html?exp=professional">Browse experiences</a></li>
-              <li><a href="news.html">See press and mentions</a></li>
-            </ul>
-          </article>
+      </article>
+      <aside class="surface side reveal">
+        <div class="side-top"><span>Operating model snapshot</span><span class="tag">intent → retrieval → trust → conversion</span></div>
+        <div class="system">
+          <div><small>User intent</small><b>Qualification that captures what the user actually means</b></div>
+          <div><small>Retrieval</small><b>Search, ranking, geography, and matching that improve result quality</b></div>
+          <div><small>Trust</small><b>UX patterns that make AI useful without overstating confidence</b></div>
+          <div><small>Operating design</small><b>Funnels, teams, and incentives aligned to real business outcomes</b></div>
         </div>
-      </section>
-    </main>
-    <script src="./data.js"></script>
-    <script src="./portfolio.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        Portfolio.injectNav(document.getElementById("site-nav"), "overview");
-      });
-    </script>
-  </body>
+        <div class="decision">
+          <small><span>Decision pattern</span><span>03 / 06</span></small>
+          <h3>Don’t add AI as ornament. Use it where retrieval, qualification, and trust already matter.</h3>
+          <p>The products that worked best were not the most theatrical. They were the ones that improved intent capture, quality, and conversion without breaking user confidence.</p>
+          <a class="button secondary" href="copilot.html">Explore the portfolio copilot</a>
+        </div>
+      </aside>
+    </section>
+    <section>
+      <div class="head reveal">
+        <div class="label">Selected work</div>
+        <div><h2>Case studies with decision logic, not just outcomes.</h2><p>The strongest signal for AI product leadership is not surface futurism. It is the ability to frame ambiguous structural problems, make disciplined tradeoffs, and move metrics that matter.</p></div>
+      </div>
+      <div class="work">
+        <article class="surface work-card reveal">
+          <div class="card-top"><span>AI + Search</span><span class="tag">LLM product</span></div>
+          <img class="logo" src="./assets/images/logos/quintoandar-logo.svg" alt="QuintoAndar" />
+          <h3>Conversational Search, Qualification, and Trust</h3>
+          <p>Built QuintoAndar’s first serious LLM product around conversational and multimodal property search while preserving qualification logic and user trust.</p>
+          <div class="mini">
+            <div class="row"><span>intent clarity</span><div class="bar"><span style="width:78%"></span></div><strong>↑</strong></div>
+            <div class="row"><span>trust</span><div class="bar"><span style="width:72%"></span></div><strong>↑</strong></div>
+            <div class="row"><span>search quality</span><div class="bar"><span style="width:74%"></span></div><strong>↑</strong></div>
+          </div>
+          <div class="foot"><span>Natural language + visual retrieval</span><a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-agent-search-w-machine-vision">Read case →</a></div>
+        </article>
+        <article class="surface work-card reveal">
+          <div class="card-top"><span>Search systems</span><span class="tag">quality thesis</span></div>
+          <img class="logo" src="./assets/images/logos/quintoandar-logo.svg" alt="QuintoAndar" />
+          <h3>Search, Qualification, and Quality</h3>
+          <p>Redesigned discovery around better intent capture, geographic precision, maps, filters, and retrieval quality across rental and for-sale marketplaces.</p>
+          <div class="mini">
+            <div class="row"><span>relevance</span><div class="bar"><span style="width:76%"></span></div><strong>↑</strong></div>
+            <div class="row"><span>precision</span><div class="bar"><span style="width:81%"></span></div><strong>↑</strong></div>
+            <div class="row"><span>contracts</span><div class="bar"><span style="width:67%"></span></div><strong>↑</strong></div>
+          </div>
+          <div class="foot"><span>UI, ranking, geography, trust</span><a href="case.html#quintoandar-sr-head-of-product-search-recs-app-comms-ai-search-qualification-quality">Read case →</a></div>
+        </article>
+        <article class="surface work-card reveal">
+          <div class="card-top"><span>Marketplace redesign</span><span class="tag">9x growth</span></div>
+          <img class="logo" src="./assets/images/logos/quintoandar-logo.svg" alt="QuintoAndar" />
+          <h3>From Marketplace Clone to Sales Engine</h3>
+          <p>Helped transform the for-sale business through operating-model redesign across qualification, lead allocation, agent continuity, and funnel structure.</p>
+          <div class="mini">
+            <div class="row"><span>signed contracts</span><div class="bar"><span style="width:92%"></span></div><strong>9×</strong></div>
+            <div class="row"><span>funnel fit</span><div class="bar"><span style="width:73%"></span></div><strong>↑</strong></div>
+            <div class="row"><span>sales efficiency</span><div class="bar"><span style="width:69%"></span></div><strong>↑</strong></div>
+          </div>
+          <div class="foot"><span>Ops + product + market fit</span><a href="case.html#quintoandar-group-product-manager-forsale-marketplace-casa-mineira-integration-9x-forsale-growth">Read case →</a></div>
+        </article>
+      </div>
+    </section>
+    <section>
+      <div class="head reveal">
+        <div class="label">About</div>
+        <div><h2>I work where product strategy, system behavior, and business design collide.</h2><p>I’m especially useful in roles where the work is cross-functional, technically adjacent, commercially material, and impossible to solve with surface-level product management.</p></div>
+      </div>
+      <div class="about-grid">
+        <article class="surface about reveal"><div class="label">What I focus on</div><ul class="list"><li>AI-native product experiences with real user and business stakes</li><li>Search, recommendations, retrieval, qualification, and trust</li><li>Marketplace and transaction systems where operating design matters</li></ul></article>
+        <article class="surface about reveal"><div class="label">What I’m unusually good at</div><ul class="list"><li>Turning ambiguous structural problems into clear product direction</li><li>Working at the product–engineering–data boundary without losing commercial clarity</li><li>Finding the product shape that makes a technical system usable and valuable</li></ul></article>
+        <article class="surface about reveal"><div class="label">What I optimize for</div><ul class="list"><li>Clarity over hype</li><li>Trustworthy adoption over novelty theater</li><li>Business outcomes that come from better system design, not just more features</li></ul></article>
+      </div>
+    </section>
+    <section>
+      <div class="surface footer reveal">
+        <div>
+          <div class="pill"><span class="dot"></span> Available for senior AI product leadership, staff/principal roles, and selected advisory conversations</div>
+          <h2>Built for the next chapter, not just as a retrospective.</h2>
+          <p>The goal of this portfolio is to make three things obvious, fast: technical product credibility, AI-specific operating judgment, and proof of business impact.</p>
+        </div>
+        <div class="contact">
+          <small>Links</small>
+          <a href="https://www.linkedin.com/in/jamesgoulart/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://github.com/james-goulart" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://drive.google.com/file/d/16QbQk8KQL5xrE3bTa-pk7iuZinO51s0F/view?usp=sharing" target="_blank" rel="noopener noreferrer">Download CV</a>
+          <a href="news.html">Press & mentions</a>
+        </div>
+      </div>
+      <div class="credits"><span>Editorial refresh for the overview page</span><span>Existing case, experience, news, and copilot pages remain fully accessible</span></div>
+    </section>
+  </main>
+  <script src="./data.js"></script>
+  <script src="./portfolio.js"></script>
+  <script>document.addEventListener("DOMContentLoaded",function(){Portfolio.injectNav(document.getElementById("site-nav"),"overview");var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("show");o.unobserve(e.target)}})},{threshold:.12});document.querySelectorAll(".reveal").forEach(function(el){o.observe(el)})});</script>
+</body>
 </html>
